@@ -1,251 +1,258 @@
-# Perplexity Clone - Hanover Park Take-Home
+# Simplexity
 
-A simplified clone of Perplexity.ai built with TypeScript - allowing users to submit queries and receive AI-generated answers with citations based on real-time search results.
+A Perplexity.ai clone built with Next.js, TypeScript, and Claude AI.
 
-## Assignment Objectives
+**Live Demo:** [https://hanover-takehome.vercel.app/](https://hanover-takehome.vercel.app/)
 
-Build a web application that:
-1. Accepts user search queries
-2. Fetches real-time search results from search API
-3. Generates AI-powered responses using search context
-4. Displays results with proper citations and source links
-5. (Bonus) Additional features as time permits
+## Features
+
+- Real-time web search via SerpAPI (Google results)
+- AI-powered answers using Claude Sonnet 4.5
+- Inline citations with clickable source badges
+- Progressive streaming (search results cascade in, answers appear word-by-word)
+- Multi-turn conversations with persistent history
+- Auto-generated conversation titles
+- AI-generated suggested follow-up questions
+- Tab navigation between answer view and sources grid
+- sessionStorage persistence (survives page refresh)
+
+## Next Features to Delight Users
+
+- **Browser Extension** - Research portfolio companies without leaving Bloomberg/PitchBook. Highlight a ticker or company name → instant analysis with sources. Due diligence in seconds, not hours.
+
+- **Share Conversations** - Send research links to investment committee members. Everyone sees the same sources and reasoning. No more forwarding 10 different PDFs or re-explaining your findings in meetings.
+
+- **Citation Preview on Hover** - Verify regulatory claims and market data instantly. Hover over [1] to see the SEC filing or analyst report snippet. Critical for compliance and audit trails.
+
+- **Export to Notion/Google Docs** - Drop research directly into investment memos and board reports. Fund admins spend hours reformatting research - one click eliminates that entirely.
+
+- **Analyze This URL** - Paste a 10-K filing or industry report, get instant summary. Cuts hours of reading into 2 minutes of AI-powered analysis. Perfect for quick prep before partner calls.
+
+- **Saved Searches & Alerts** - Monitor keywords like "regulatory changes" or specific portfolio companies. Get daily digests of relevant updates. Stay ahead of market moves without manual checking.
+
+- **Keyboard Shortcuts** - `Cmd+K` for new research, `Cmd+Enter` to submit, `/` to focus search. Analysts running 20+ searches per day save hours per week.
+
+- **Team Workspaces** - Shared conversation history across the fund. Junior analysts see what senior partners researched. Institutional knowledge becomes searchable, not siloed in email.
 
 ## Tech Stack
 
-### Currently Installed
-**Frontend Framework:**
-- Next.js 15.2.4 (App Router, React Server Components)
-- React 19
-- TypeScript 5
+- **Next.js 15.2.4** - App Router, React Server Components, API Routes
+- **React 19** - Concurrent rendering
+- **TypeScript 5** - Full type safety
+- **Tailwind CSS 4.1.9** - Styling
+- **Anthropic Claude Sonnet 4.5** - AI answer generation
+- **SerpAPI** - Google search results
+- **ReadableStream** - Progressive UI updates
 
-**Styling & UI:**
-- Tailwind CSS 4.1.9
-- lucide-react (icons)
-- clsx + tailwind-merge (utility functions)
+## Screenshots
 
-**AI & APIs:**
-- @anthropic-ai/sdk v0.67.0 (Anthropic Claude API)
-- SerpAPI (web search results via HTTP API)
+### 1. Initial State
+![Empty state with centered search input](docs/screenshots/04-initial-state.png)
 
-### Architecture
-**State Management:**
-- React hooks for local component state
-- sessionStorage for conversation persistence (no external state library needed)
+Clean interface with single search input.
 
-**Data Flow:**
-- Client-side React components
-- Next.js API routes for backend integration
-- sessionStorage for conversation history
+---
 
-## Project Status
+### 2. Streaming Search Results
+![First search result appearing](docs/screenshots/11-streaming-result.png)
 
-✅ **Status**: Core implementation complete
+Search results appear one-by-one with cascading effect.
 
-### Current Phase
-- [x] Project setup and framework selection (Next.js + React + TypeScript + Tailwind)
-- [x] API provider selection (SerpAPI + Anthropic Claude)
-- [x] Core search + AI integration (API routes implemented)
-- [x] UI implementation (Simplexity-style interface)
-- [x] Citations and source linking
-- [x] Conversation management (sessionStorage)
-- [x] Testing and polish (conversation threading, auto-scroll, loading states)
-- [x] Production deployment ready
-- [ ] Additional features (optional enhancements)
+---
 
-## Architecture Decisions
+### 3. Multiple Sources
+![Six source cards streaming in](docs/screenshots/12-streaming-sources.png)
 
-### Framework & Core Tech (2025-10-20)
-- **Next.js 15** with App Router for modern, performant architecture
-- **React 19** for latest features and concurrent rendering
-- **TypeScript 5** for type safety (required by assignment)
-- **Tailwind CSS 4** for rapid, consistent styling
-- **Next.js API Routes** for serverless backend endpoints
-- **sessionStorage** for client-side conversation persistence
+Multiple sources cascade in with favicon, title, and snippet.
 
-**Rationale**: Minimalist stack prioritizing speed and simplicity. Next.js API routes provide built-in backend without separate server. sessionStorage sufficient for MVP without database complexity. No state management library needed - React hooks handle UI state efficiently.
+---
 
-### Current Setup Status
-- ✅ **Base Framework**: Next.js 15 + React 19 + TypeScript 5
-- ✅ **Styling**: Tailwind CSS 4 with minimal configuration
-- ✅ **Icons**: lucide-react
-- ✅ **Build**: Successfully builds and runs (`npm run build` passes)
-- ⏳ **Additional Dependencies**: To be added as needed based on implementation approach
+### 4. AI Answer Streaming
+![AI answer appearing in real-time](docs/screenshots/13-streaming-answer.png)
 
-### API Providers (Selected)
+Answer appears word-by-word as Claude generates it, with inline citations.
 
-**Search API: SerpAPI**
-- Provides Google search results via API
-- Free tier: 100 searches/month
-- Good documentation and TypeScript support
-- Rationale: Mentioned in assignment description, reliable results
+---
 
-**LLM API: Anthropic Claude**
-- Claude Sonnet 4.5 for high-quality responses
-- Excellent at following citation instructions
-- Strong context understanding for search results
-- Rationale: Better citation accuracy than alternatives, good free tier
+### 5. Sources Tab
+![Grid layout of all sources](docs/screenshots/14-streaming-sources-page.png)
 
-### Implementation Architecture
+2-column grid view of all sources.
 
-**Components:**
-- `Sidebar` - Navigation and new chat functionality
-- `SearchInput` - Query input with loading states
-- `ConversationView` - Main conversation container
-- `SourceCard` - Individual search result display
-- `TabNavigation` - Perplexity/Sources/Steps tabs
-- `AnswerDisplay` - AI response with inline citations
+---
 
-**API Routes:**
-- `/api/search` - Fetches search results from SerpAPI
-- `/api/generate` - Generates AI responses with Claude
+### 6. Conversation History
+![Multiple conversations with auto-generated titles](docs/screenshots/15-multiple-convos.png)
 
-**Data Management:**
-- sessionStorage for conversation persistence
-- No database required for MVP
-- Conversation history maintained client-side
+Sidebar shows all past conversations with auto-generated titles and delete option.
 
-See `docs/AGENTS_APPENDLOG.md` for complete decision history and time tracking.
+---
 
-## Development
+### 7. AI-Generated Suggested Questions
+![Five contextual follow-up questions](docs/screenshots/16-suggested-next-questions-ask.png)
 
-### Setup Instructions
+Claude generates 3-5 contextual follow-up questions after each answer.
+
+---
+
+### 8. One-Click Exploration
+![User clicked suggested question](docs/screenshots/17-suggested-next-questions-answer.png)
+
+Click a suggested question to instantly explore further.
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20.17.0 or higher
+- [Anthropic API key](https://console.anthropic.com/)
+- [SerpAPI key](https://serpapi.com/) (250 free searches/month)
+
+### Installation
 
 ```bash
-# Navigate to frontend directory
-cd apps/frontend
+# Clone repository
+git clone https://github.com/[username]/hanover-takehome.git
+cd hanover-takehome/apps/frontend
 
-# Install dependencies (already done)
+# Install dependencies
 npm install
+
+# Create environment file
+cp .env.example .env
+
+# Add your API keys to .env
+# ANTHROPIC_API_KEY=your_key_here
+# SERPAPI_API_KEY=your_key_here
 
 # Run development server
 npm run dev
 ```
 
-The app will be available at [http://localhost:3000](http://localhost:3000)
+Visit [http://localhost:3000](http://localhost:3000)
 
-### Building for Production
-
-```bash
-npm run build
-npm start
-```
-
-### Environment Variables
-
-Copy `.env.example` to `.env.local` and add your API keys:
+### Deployment
 
 ```bash
-cp .env.example .env.local
+# Deploy to Vercel
+vercel
 ```
 
-Then add your API keys to `.env.local`:
-- `ANTHROPIC_API_KEY` - Your Anthropic API key from https://console.anthropic.com/
-- `SERPAPI_API_KEY` - Your SerpAPI key from https://serpapi.com/
+Set environment variables in Vercel dashboard:
+- `ANTHROPIC_API_KEY`
+- `SERPAPI_API_KEY`
 
-**Required API Keys:**
-1. **Anthropic API Key**: Sign up at https://console.anthropic.com/ (free tier available)
-2. **SerpAPI Key**: Sign up at https://serpapi.com/ (100 free searches/month)
+## Project Structure
 
-## Screenshots
+```
+apps/frontend/
+├── app/
+│   ├── page.tsx                    # Main UI - conversation threading, streaming
+│   ├── components/
+│   │   ├── Sidebar.tsx            # Conversation history
+│   │   ├── SearchInput.tsx        # Auto-resize textarea
+│   │   ├── SourceCard.tsx         # Reusable source display
+│   │   ├── TabNavigation.tsx      # Tab switching
+│   │   ├── AnswerDisplay.tsx      # Markdown answer with citations
+│   │   └── SuggestedQuestions.tsx # AI follow-up questions
+│   └── api/
+│       ├── search/route.ts        # SerpAPI streaming
+│       ├── generate/route.ts      # Claude streaming
+│       └── suggest-questions/route.ts
+├── lib/
+│   ├── types.ts                   # TypeScript interfaces
+│   └── conversationStore.ts       # sessionStorage CRUD
+└── package.json
+```
 
-### 1. Initial State
-![Empty state with search input](docs/screenshots/04-initial-state.png)
+## How It Works
 
-Clean interface with "simplexity" branding, centered search input ready for queries.
+### Streaming Architecture
 
-### 2. Loading State
-![AI processing with skeleton loader](docs/screenshots/05-loading-state.png)
+**Search Results:**
+```typescript
+// Server sends results one-by-one with 100ms delay
+for (let i = 0; i < results.length; i++) {
+  const chunk = JSON.stringify({ type: 'result', data: results[i] }) + '\n';
+  controller.enqueue(encoder.encode(chunk));
+  await new Promise(resolve => setTimeout(resolve, 100));
+}
+```
 
-Immediate feedback with pulsing dots and skeleton UI showing expected content structure.
+**AI Answers:**
+```typescript
+// Stream Claude's response immediately
+const messageStream = await anthropic.messages.create({
+  model: 'claude-sonnet-4-5-20250929',
+  stream: true,
+  // ...
+});
 
-### 3. First Answer with Sources & Citations
-![Complete answer with sources](docs/screenshots/06-first-answer.png)
+for await (const event of messageStream) {
+  if (event.type === 'content_block_delta') {
+    controller.enqueue(encoder.encode(
+      JSON.stringify({ type: 'text', data: event.delta.text }) + '\n'
+    ));
+  }
+}
+```
 
-Comprehensive AI-generated answer with:
-- Horizontal scrollable source cards (Wikipedia, whitehouse.gov)
-- Inline citations as clickable cyan badges [1], [2], [7]
-- Well-structured markdown formatting
+**Client:**
+```typescript
+// Parse line-delimited JSON and update UI immediately
+const reader = response.body?.getReader();
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
 
-### 4. User Typing Follow-Up Question
-![Scrolling through answer with follow-up typed](docs/screenshots/07-typing-followup.png)
+  const lines = buffer.split('\n');
+  for (const line of lines) {
+    const message = JSON.parse(line);
+    if (message.type === 'text') {
+      fullAnswer += message.data;
+      updateMessage(answerMessageId, { content: fullAnswer });
+    }
+  }
+}
+```
 
-Fixed input at bottom allows typing follow-ups while reviewing previous answer. Previous content preserved (conversation threading).
+### Conversation Management
 
-### 5. Second Question Loading - Conversation Threading
-![Second Q&A loading with previous content visible](docs/screenshots/08-second-loading.png)
+```typescript
+// Auto-generate title from first query
+if (!conversation.title && message.type === 'query') {
+  conversation.title = message.content.slice(0, 60) +
+    (message.content.length > 60 ? '...' : '');
+}
+```
 
-**Key feature**: Previous Q&A remains visible above. New question displays with loading state. Auto-scroll positions new question at top of viewport.
+### Suggested Questions
 
-### 6. Multi-Turn Conversation Complete
-![Full conversation thread with second answer](docs/screenshots/09-second-answer.png)
+```typescript
+// Generate questions in background after answer completes
+const prompt = `Based on this conversation, suggest 3-5 natural follow-up questions.
 
-Second answer fully rendered with fresh sources and citations. Users can scroll up to review entire conversation history.
+Conversation history:
+${conversationContext}
 
-## Time Allocation
+Current question: ${currentQuery}
+Current answer: ${currentAnswer}
 
-**Total Time Spent**: ~2 hours 45 minutes
+Generate questions that:
+- Go deeper into interesting aspects mentioned
+- Explore related angles not yet covered
+- Are specific and actionable
+- Feel natural as follow-ups
 
-### Breakdown by Phase:
-1. **Planning & Design** (~15 min): Screenshot analysis, architecture planning, component design
-2. **Core Implementation** (~45 min): Type definitions, API routes, state management, UI components
-3. **Debugging & Fixes** (~20 min): File location issues, lucide-react resolution, env configuration
-4. **API Migration** (~10 min): Switched from fetch to official serpapi client library
-5. **UI Polish** (~5 min): Cursor pointer on buttons, button styling
-6. **Branding** (~10 min): Complete Perplexity → Simplexity rename
-7. **Conversation Threading** (~30 min): Multi-turn Q&A display, auto-scroll, fixed input, skeleton loading
-8. **Model Upgrade & Testing** (~50 min): Claude Sonnet 4.5 upgrade, end-to-end testing, documentation
-
-### What Would Be Improved With More Time
-
-**UI/UX Enhancements:**
-- Conversation history sidebar (list of past searches)
-- Streaming responses (Claude SDK supports streaming, not implemented in MVP)
-- Better loading states (skeleton screens, animated transitions)
-- Mobile responsive design (currently desktop-focused)
-- Keyboard shortcuts (Cmd+K to focus search, etc.)
-
-**Features:**
-- "Steps" tab implementation (show reasoning process)
-- Related questions suggestions
-- Image search results
-- Dark/light theme toggle
-- Export conversation as markdown
-
-**Technical Improvements:**
-- Error boundary components for graceful failure handling
-- Retry logic for API failures
-- Rate limiting UI (show remaining API calls)
-- Unit tests for utility functions
-- E2E tests with Playwright
-- Caching layer for search results (avoid duplicate API calls)
-
-**Code Quality:**
-- tRPC for end-to-end type safety
-- Separate API client libraries into dedicated modules
-- More granular TypeScript types (less reliance on `any`)
-- Storybook for component documentation
-- Performance monitoring (Core Web Vitals)
-
-## Documentation
-
-This project maintains comprehensive documentation at multiple levels:
-
-- **CLAUDE.md** - Instructions for AI agents working on this project (living document, updated with learnings)
-- **docs/AGENTS.md** - Agent workflows and development patterns (evolves as methodology improves)
-- **docs/AGENTS_APPENDLOG.md** - Complete decision and activity log (append-only, chronological narrative)
-
-### Meta-Documentation Approach
-
-This project uses a **conversation-driven development** methodology:
-- Every significant change is logged in AGENTS_APPENDLOG.md with full context
-- User prompts and agent responses are tracked to show decision evolution
-- Insights are incorporated holistically into CLAUDE.md and AGENTS.md
-- This creates a transparent narrative of the development process for the assignment writeup
-
-**Documentation Workflow:**
-1. Make a change → 2. Append to log → 3. Update summaries → 4. Incorporate insights → 5. Refine workflows
+Return ONLY the questions, one per line.`;
+```
 
 ## License
 
-MIT
+MIT License
+
+---
+
+**Built by Bryan Owens for Hanover Park**
