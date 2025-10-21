@@ -55,14 +55,14 @@ Build a web application that:
 ## Architecture Decisions
 
 ### Framework & Core Tech (2025-10-20)
-- **Next.js 15** with App Router and React Server Components for modern, performant architecture
+- **Next.js 15** with App Router for modern, performant architecture
 - **React 19** for latest features and concurrent rendering
 - **TypeScript 5** for type safety (required by assignment)
 - **Tailwind CSS 4** for rapid, consistent styling
-- **tRPC + TanStack Query** for type-safe, efficient API communication
-- **Supabase** for backend services (database, auth if needed)
+- **Next.js API Routes** for serverless backend endpoints
+- **sessionStorage** for client-side conversation persistence
 
-**Rationale**: Proven stack with excellent TypeScript support, modern patterns, and rapid development capability. Minimizes setup time while maximizing code quality.
+**Rationale**: Minimalist stack prioritizing speed and simplicity. Next.js API routes provide built-in backend without separate server. sessionStorage sufficient for MVP without database complexity. No state management library needed - React hooks handle UI state efficiently.
 
 ### Current Setup Status
 - ✅ **Base Framework**: Next.js 15 + React 19 + TypeScript 5
@@ -148,13 +148,44 @@ Then add your API keys to `.env.local`:
 
 ## Time Allocation
 
-**Total Time Budget**: _TBD_
+**Total Time Spent**: ~1.5 hours
 
-_Time spent on each phase will be documented here._
+### Breakdown by Phase:
+1. **Planning & Design** (~15 min): Screenshot analysis, architecture planning, component design
+2. **Core Implementation** (~45 min): Type definitions, API routes, state management, UI components
+3. **Debugging & Fixes** (~20 min): File location issues, lucide-react resolution, env configuration
+4. **API Migration** (~10 min): Switched from fetch to official serpapi client library
 
 ### What Would Be Improved With More Time
 
-_This section will be updated as the project progresses._
+**UI/UX Enhancements:**
+- Conversation history sidebar (list of past searches)
+- Streaming responses (Claude SDK supports streaming, not implemented in MVP)
+- Better loading states (skeleton screens, animated transitions)
+- Mobile responsive design (currently desktop-focused)
+- Keyboard shortcuts (Cmd+K to focus search, etc.)
+
+**Features:**
+- "Steps" tab implementation (show reasoning process)
+- Related questions suggestions
+- Image search results
+- Dark/light theme toggle
+- Export conversation as markdown
+
+**Technical Improvements:**
+- Error boundary components for graceful failure handling
+- Retry logic for API failures
+- Rate limiting UI (show remaining API calls)
+- Unit tests for utility functions
+- E2E tests with Playwright
+- Caching layer for search results (avoid duplicate API calls)
+
+**Code Quality:**
+- tRPC for end-to-end type safety
+- Separate API client libraries into dedicated modules
+- More granular TypeScript types (less reliance on `any`)
+- Storybook for component documentation
+- Performance monitoring (Core Web Vitals)
 
 ## Documentation
 

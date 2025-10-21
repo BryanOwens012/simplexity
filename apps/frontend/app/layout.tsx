@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Perplexity Clone - AI Search Assistant",
+  title: "Simplexity Clone - AI Search Assistant",
   description: "Search and get AI-powered answers with citations",
 };
 

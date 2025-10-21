@@ -38,7 +38,7 @@ export const SearchInput = ({
           {/* Left Icons */}
           <div className="flex items-center gap-3">
             <button
-              className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+              className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors cursor-pointer"
               aria-label="Search"
             >
               <Search className="w-4 h-4" />
@@ -68,7 +68,7 @@ export const SearchInput = ({
           <button
             onClick={handleSubmit}
             disabled={!query.trim() || isLoading}
-            className="p-2.5 rounded-lg bg-cyan-500 text-white hover:bg-cyan-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2.5 rounded-lg bg-cyan-500 text-white hover:bg-cyan-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             aria-label="Submit query"
           >
             <ArrowUp className="w-4 h-4" />

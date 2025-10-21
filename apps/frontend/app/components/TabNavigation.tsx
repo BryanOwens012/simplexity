@@ -2,7 +2,7 @@
 
 import { Circle } from 'lucide-react';
 
-export type Tab = 'perplexity' | 'sources';
+export type Tab = 'simplexity' | 'sources';
 
 interface TabNavigationProps {
   activeTab: Tab;
@@ -18,25 +18,25 @@ export const TabNavigation = ({
   return (
     <div className="flex items-center gap-6 border-b border-zinc-800">
       <button
-        onClick={() => onTabChange('perplexity')}
-        className={`relative pb-3 px-1 text-sm font-medium transition-colors ${
-          activeTab === 'perplexity'
+        onClick={() => onTabChange('simplexity')}
+        className={`relative pb-3 px-1 text-sm font-medium transition-colors cursor-pointer ${
+          activeTab === 'simplexity'
             ? 'text-white'
             : 'text-zinc-500 hover:text-zinc-300'
         }`}
       >
         <div className="flex items-center gap-2">
           <Circle className="w-4 h-4" />
-          <span>Perplexity</span>
+          <span>Simplexity</span>
         </div>
-        {activeTab === 'perplexity' && (
+        {activeTab === 'simplexity' && (
           <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white" />
         )}
       </button>
 
       <button
         onClick={() => onTabChange('sources')}
-        className={`relative pb-3 px-1 text-sm font-medium transition-colors ${
+        className={`relative pb-3 px-1 text-sm font-medium transition-colors cursor-pointer ${
           activeTab === 'sources'
             ? 'text-white'
             : 'text-zinc-500 hover:text-zinc-300'

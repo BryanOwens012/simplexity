@@ -27,7 +27,7 @@ export const Sidebar = ({ onNewChat }: SidebarProps) => {
       {/* New Chat Button */}
       <button
         onClick={onNewChat}
-        className="w-10 h-10 flex items-center justify-center rounded-lg border border-zinc-700 hover:bg-zinc-800 transition-colors"
+        className="w-10 h-10 flex items-center justify-center rounded-lg border border-zinc-700 hover:bg-zinc-800 transition-colors cursor-pointer"
         aria-label="New chat"
       >
         <Plus className="w-5 h-5 text-zinc-400" />
@@ -36,7 +36,7 @@ export const Sidebar = ({ onNewChat }: SidebarProps) => {
       {/* Navigation */}
       <nav className="flex flex-col items-center gap-6 mt-4">
         <button
-          className="flex flex-col items-center gap-1 text-cyan-400"
+          className="flex flex-col items-center gap-1 text-cyan-400 cursor-pointer"
           aria-label="Home"
         >
           <Search className="w-5 h-5" />

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getJson } from 'serpapi';
 import type { SearchRequest, SearchResponse, SerpAPIResponse, SearchResult } from '@/lib/types';
-
-export const runtime = 'edge';
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -22,37 +21,16 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    // Call SerpAPI
-    const searchParams = new URLSearchParams({
+    // Call SerpAPI using the official client library
+    const data = (await getJson({
+      engine: 'google',
       api_key: apiKey,
       q: query,
-      engine: 'google',
       google_domain: 'google.com',
       gl: 'us',
       hl: 'en',
-      num: '10', // Get top 10 results
-    });
-
-    const response = await fetch(
-      `https://serpapi.com/search?${searchParams.toString()}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('SerpAPI error:', errorText);
-      return NextResponse.json(
-        { error: 'Search API request failed' },
-        { status: response.status }
-      );
-    }
-
-    const data = (await response.json()) as SerpAPIResponse;
+      num: 10, // Get top 10 results
+    })) as SerpAPIResponse;
 
     // Transform SerpAPI results to our SearchResult format
     const results: SearchResult[] = (data.organic_results || []).map((result) => ({

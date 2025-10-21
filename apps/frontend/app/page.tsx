@@ -19,7 +19,7 @@ import type { Conversation, Message, SearchResult } from '@/lib/types';
 export default function HomePage() {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [isSearching, setIsSearching] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>('perplexity');
+  const [activeTab, setActiveTab] = useState<Tab>('simplexity');
   const [currentQuery, setCurrentQuery] = useState('');
 
   // Load conversation from sessionStorage on mount
@@ -31,7 +31,7 @@ export default function HomePage() {
   const handleNewChat = () => {
     const newConv = createConversation();
     setConversation(newConv);
-    setActiveTab('perplexity');
+    setActiveTab('simplexity');
     setCurrentQuery('');
   };
 
@@ -148,7 +148,7 @@ export default function HomePage() {
             <div className="w-full max-w-3xl">
               {/* Logo */}
               <h1 className="text-5xl font-light text-center mb-16">
-                perplexity
+                simplexity
               </h1>
 
               {/* Search Input */}
@@ -174,7 +174,7 @@ export default function HomePage() {
 
             {/* Tab Content */}
             <div className="mt-6">
-              {activeTab === 'perplexity' && (
+              {activeTab === 'simplexity' && (
                 <div className="space-y-6">
                   {/* Sources - Horizontal Scroll */}
                   {latestAnswer.sources && latestAnswer.sources.length > 0 && (

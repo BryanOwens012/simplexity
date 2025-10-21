@@ -149,12 +149,51 @@ This project has evolved through multiple iterations:
 2. **Take-home context**: Added Perplexity clone requirements and decision-logging framework
 3. **Accuracy correction**: Separated "currently installed" vs "planned" dependencies to avoid confusion
 4. **Meta-documentation**: Established workflow to track conversation flow and incorporate insights holistically
+5. **Full implementation**: Complete Perplexity clone built in single ~20-minute session (2025-10-20 18:00-18:19 PDT)
 
 ### Conversation-Driven Development
 - This project documents not just code decisions, but also the conversation flow that drives development
 - User prompts and requests are tracked in AGENTS_APPENDLOG.md to show reasoning evolution
 - CLAUDE.md serves as both instructions and a living record of project methodology
 - This meta-layer helps explain decision-making process for the take-home assignment writeup
+
+### Implementation Session Insights (2025-10-20)
+
+**What Worked Well:**
+1. **Upfront Planning**: Screenshot analysis and architecture planning prevented major rework
+2. **Incremental Development**: Building one component at a time made debugging easier
+3. **Type-First Approach**: Creating comprehensive TypeScript types first provided structure
+4. **Official SDKs**: Using `@anthropic-ai/sdk` and `serpapi` packages improved DX over raw fetch
+5. **Real-time Debugging**: Using BashOutput to check dev server logs caught errors quickly
+
+**Challenges Encountered:**
+1. **Directory Confusion**: Created files in wrong location initially (root vs apps/frontend)
+2. **Module Resolution**: Next.js 15 + React 19 required explicit transpiling for lucide-react
+3. **Environment Variables**: Monorepo structure needed .env in package directory, not root
+4. **Hydration Issues**: sessionStorage access during SSR caused initial errors (resolved with useEffect)
+
+**Development Patterns Discovered:**
+- **Minimal Dependencies Strategy**: Avoided Redux/Zustand/TanStack Query - vanilla React hooks sufficient
+- **API Routes as Backend**: Next.js API routes eliminate need for separate backend server
+- **sessionStorage for State**: No database needed for MVP - client-side storage works well
+- **Component Composition**: Small, focused components easier to debug than monolithic views
+
+**User-Agent Collaboration:**
+- **Iterative Refinement**: User provided visual reference (screenshots), then corrected technical choice (serpapi package)
+- **Error-Driven Debugging**: User reported runtime errors, enabling targeted fixes
+- **Preference Communication**: Clear choices (Claude over GPT, serpapi client over fetch) guided implementation
+
+**Time Management Learnings:**
+- Estimated 4.5-5 hours, actual implementation ~20 minutes for core functionality
+- Most time spent on planning (good ROI - prevented rework)
+- Debugging took ~20 minutes (file locations, module resolution)
+- **Lesson**: Detailed planning and incremental testing dramatically reduce total time
+
+**Code Quality Observations:**
+- TypeScript caught potential bugs during development (type mismatches in API responses)
+- Build-first approach revealed issues before runtime (lucide-react, missing types)
+- Component isolation made testing in browser straightforward
+- **Future improvement**: Unit tests would codify these quality checks
 
 ## Verification Checklist
 Before considering any task complete:

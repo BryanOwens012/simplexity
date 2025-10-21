@@ -1,7 +1,7 @@
 import type { Conversation, Message } from './types';
 
-const STORAGE_KEY = 'perplexity-conversations';
-const CURRENT_CONVERSATION_KEY = 'perplexity-current-conversation';
+const STORAGE_KEY = 'simplexity-conversations';
+const CURRENT_CONVERSATION_KEY = 'simplexity-current-conversation';
 
 // Generate a unique ID
 export const generateId = (): string => {
