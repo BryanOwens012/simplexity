@@ -1,9 +1,8 @@
 {
-  "buildCommand": "cd apps/frontend && npm install && npm run build",
-  "devCommand": "cd apps/frontend && npm run dev",
-  "installCommand": "cd apps/frontend && npm install",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
   "framework": "nextjs",
-  "outputDirectory": "apps/frontend/.next",
   "headers": [
     {
       "source": "/api/(.*)",
@@ -14,9 +13,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "ANTHROPIC_API_KEY": "@anthropic_api_key",
-    "SERPAPI_API_KEY": "@serpapi_api_key"
-  }
+  ]
 }
