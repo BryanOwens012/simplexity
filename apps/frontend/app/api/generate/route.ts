@@ -64,56 +64,82 @@ ${sourcesContext}
 
 Please provide a comprehensive answer to the user's question, using inline citations [1], [2], etc. to reference the sources above.`;
 
-    // Call Claude API
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 2048,
-      system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: userPrompt,
-        },
-      ],
+    // Stream Claude API response
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const messageStream = await anthropic.messages.create({
+            model: 'claude-sonnet-4-5-20250929',
+            max_tokens: 2048,
+            system: systemPrompt,
+            messages: [
+              {
+                role: 'user',
+                content: userPrompt,
+              },
+            ],
+            stream: true,
+          });
+
+          let fullText = '';
+
+          for await (const event of messageStream) {
+            if (event.type === 'content_block_delta') {
+              if (event.delta.type === 'text_delta') {
+                const text = event.delta.text;
+                fullText += text;
+
+                // Send text chunk
+                const chunk = JSON.stringify({ type: 'text', data: text }) + '\n';
+                controller.enqueue(encoder.encode(chunk));
+              }
+            } else if (event.type === 'message_stop') {
+              // Extract citations from full text
+              const citationRegex = /\[(\d+)\]/g;
+              const citationMatches = [...fullText.matchAll(citationRegex)];
+
+              const citations: Citation[] = citationMatches.map((match) => {
+                const sourceIndex = parseInt(match[1], 10) - 1;
+                return {
+                  number: parseInt(match[1], 10),
+                  sourceIndex: sourceIndex >= 0 && sourceIndex < sources.length ? sourceIndex : 0,
+                  text: match[0],
+                };
+              });
+
+              // Remove duplicate citations
+              const uniqueCitations = citations.filter(
+                (citation, index, self) =>
+                  index === self.findIndex((c) => c.number === citation.number)
+              );
+
+              // Send citations
+              const citationsChunk = JSON.stringify({
+                type: 'citations',
+                data: uniqueCitations
+              }) + '\n';
+              controller.enqueue(encoder.encode(citationsChunk));
+
+              // Send done signal
+              const doneChunk = JSON.stringify({ type: 'done' }) + '\n';
+              controller.enqueue(encoder.encode(doneChunk));
+              controller.close();
+            }
+          }
+        } catch (error) {
+          console.error('Streaming error:', error);
+          controller.error(error);
+        }
+      },
     });
 
-    // Extract text content from Claude's response
-    const textContent = message.content.find((block) => block.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
-      return NextResponse.json(
-        { error: 'No text response from AI' },
-        { status: 500 }
-      );
-    }
-
-    const answer = textContent.text;
-
-    // Extract citations from the answer
-    // Look for patterns like [1], [2], etc.
-    const citationRegex = /\[(\d+)\]/g;
-    const citationMatches = [...answer.matchAll(citationRegex)];
-
-    const citations: Citation[] = citationMatches.map((match, index) => {
-      const sourceIndex = parseInt(match[1], 10) - 1; // Convert to 0-indexed
-      return {
-        number: parseInt(match[1], 10),
-        sourceIndex: sourceIndex >= 0 && sourceIndex < sources.length ? sourceIndex : 0,
-        text: match[0],
-      };
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+      },
     });
-
-    // Remove duplicate citations (same number referenced multiple times)
-    const uniqueCitations = citations.filter(
-      (citation, index, self) =>
-        index === self.findIndex((c) => c.number === citation.number)
-    );
-
-    const response: GenerateResponse = {
-      answer,
-      citations: uniqueCitations,
-    };
-
-    return NextResponse.json(response);
   } catch (error) {
     console.error('Generate API error:', error);
 

@@ -103,7 +103,7 @@ export default function HomePage() {
     setConversation(updatedConv);
 
     try {
-      // Step 1: Fetch search results
+      // Step 1: Fetch search results (streaming)
       const searchResponse = await fetch('/api/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -114,11 +114,50 @@ export default function HomePage() {
         throw new Error('Search failed');
       }
 
-      const { results: sources } = (await searchResponse.json()) as {
-        results: SearchResult[];
-      };
+      // Read streaming results
+      const sources: SearchResult[] = [];
+      const reader = searchResponse.body?.getReader();
+      const decoder = new TextDecoder();
 
-      // Step 2: Generate AI answer with citations
+      if (reader) {
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+
+          // Keep the last incomplete line in the buffer
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.trim()) {
+              try {
+                const message = JSON.parse(line);
+
+                if (message.type === 'result') {
+                  sources.push(message.data);
+
+                  // Update UI with new source
+                  updateMessage(conversation.id, answerMessageId, {
+                    sources: [...sources],
+                  });
+                  setConversation(getOrCreateCurrentConversation());
+                } else if (message.type === 'done') {
+                  break;
+                }
+              } catch (e) {
+                console.error('Error parsing streaming chunk:', e);
+              }
+            }
+          }
+        }
+      }
+
+      // Step 2: Generate AI answer with citations (streaming)
       const generateResponse = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -133,18 +172,62 @@ export default function HomePage() {
         throw new Error('Answer generation failed');
       }
 
-      const { answer, citations } = await generateResponse.json();
+      // Read streaming answer
+      const genReader = generateResponse.body?.getReader();
+      const genDecoder = new TextDecoder();
 
-      // Update the answer message with results
-      updateMessage(conversation.id, answerMessageId, {
-        content: answer,
-        sources,
-        citations,
-        isLoading: false,
-      });
+      if (genReader) {
+        let buffer = '';
+        let fullAnswer = '';
+        let citations: any[] = [];
 
-      // Reload conversation from storage
-      setConversation(getOrCreateCurrentConversation());
+        while (true) {
+          const { done, value } = await genReader.read();
+
+          if (done) break;
+
+          buffer += genDecoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+
+          // Keep the last incomplete line in the buffer
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.trim()) {
+              try {
+                const message = JSON.parse(line);
+
+                if (message.type === 'text') {
+                  fullAnswer += message.data;
+
+                  // Update UI with streaming text
+                  updateMessage(conversation.id, answerMessageId, {
+                    content: fullAnswer,
+                    sources,
+                    isLoading: false,
+                  });
+                  setConversation(getOrCreateCurrentConversation());
+                } else if (message.type === 'citations') {
+                  citations = message.data;
+
+                  // Update with final citations
+                  updateMessage(conversation.id, answerMessageId, {
+                    content: fullAnswer,
+                    sources,
+                    citations,
+                    isLoading: false,
+                  });
+                  setConversation(getOrCreateCurrentConversation());
+                } else if (message.type === 'done') {
+                  break;
+                }
+              } catch (e) {
+                console.error('Error parsing streaming chunk:', e);
+              }
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error('Search error:', error);
 

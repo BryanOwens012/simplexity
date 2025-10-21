@@ -150,17 +150,17 @@ Then add your API keys to `.env.local`:
 ## Screenshots
 
 ### 1. Initial State
-![Empty state with search input](docs/screenshots/01-initial-state.png)
+![Empty state with search input](docs/screenshots/04-initial-state.png)
 
 Clean interface with "simplexity" branding, centered search input ready for queries.
 
 ### 2. Loading State
-![AI processing with skeleton loader](docs/screenshots/02-loading-state.png)
+![AI processing with skeleton loader](docs/screenshots/05-loading-state.png)
 
 Immediate feedback with pulsing dots and skeleton UI showing expected content structure.
 
 ### 3. First Answer with Sources & Citations
-![Complete answer with sources](docs/screenshots/03-first-answer.png)
+![Complete answer with sources](docs/screenshots/06-first-answer.png)
 
 Comprehensive AI-generated answer with:
 - Horizontal scrollable source cards (Wikipedia, whitehouse.gov)
@@ -168,17 +168,17 @@ Comprehensive AI-generated answer with:
 - Well-structured markdown formatting
 
 ### 4. User Typing Follow-Up Question
-![Scrolling through answer with follow-up typed](docs/screenshots/04-typing-followup.png)
+![Scrolling through answer with follow-up typed](docs/screenshots/07-typing-followup.png)
 
 Fixed input at bottom allows typing follow-ups while reviewing previous answer. Previous content preserved (conversation threading).
 
 ### 5. Second Question Loading - Conversation Threading
-![Second Q&A loading with previous content visible](docs/screenshots/05-second-loading.png)
+![Second Q&A loading with previous content visible](docs/screenshots/08-second-loading.png)
 
 **Key feature**: Previous Q&A remains visible above. New question displays with loading state. Auto-scroll positions new question at top of viewport.
 
 ### 6. Multi-Turn Conversation Complete
-![Full conversation thread with second answer](docs/screenshots/06-second-answer.png)
+![Full conversation thread with second answer](docs/screenshots/09-second-answer.png)
 
 Second answer fully rendered with fresh sources and citations. Users can scroll up to review entire conversation history.
 

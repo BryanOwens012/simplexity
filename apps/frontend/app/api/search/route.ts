@@ -41,12 +41,38 @@ export const POST = async (req: NextRequest) => {
       position: result.position,
     }));
 
-    const searchResponse: SearchResponse = {
-      results,
-      searchMetadata: data.search_metadata,
-    };
+    // Stream results one by one
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          // Send results one at a time with small delay for better UX
+          for (let i = 0; i < results.length; i++) {
+            const chunk = JSON.stringify({ type: 'result', data: results[i] }) + '\n';
+            controller.enqueue(encoder.encode(chunk));
 
-    return NextResponse.json(searchResponse);
+            // Small delay between results for streaming effect
+            if (i < results.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+          }
+
+          // Send completion signal
+          const doneChunk = JSON.stringify({ type: 'done' }) + '\n';
+          controller.enqueue(encoder.encode(doneChunk));
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+      },
+    });
   } catch (error) {
     console.error('Search API error:', error);
     return NextResponse.json(
