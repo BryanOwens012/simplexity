@@ -4,6 +4,8 @@ A Perplexity.ai clone built with Next.js, TypeScript, and Claude AI.
 
 **Live Demo:** [https://hanover-takehome.vercel.app/](https://hanover-takehome.vercel.app/)
 
+**Video Explanation:** [https://drive.google.com/file/d/16_68To1lwZIpEqIGbpiLxVGZRyxSguGK/view?usp=drive_link](https://drive.google.com/file/d/16_68To1lwZIpEqIGbpiLxVGZRyxSguGK/view?usp=drive_link)
+
 ## Features
 
 - Real-time web search via SerpAPI (Google results)
