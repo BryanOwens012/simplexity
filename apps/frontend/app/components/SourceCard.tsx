@@ -24,7 +24,7 @@ export const SourceCard = ({ source, index }: SourceCardProps) => {
       href={source.link}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex-shrink-0 w-64 bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-700 hover:bg-zinc-800/50 transition-colors group"
+      className="block w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 hover:bg-zinc-800/50 transition-all shadow-lg hover:shadow-xl group cursor-pointer"
     >
       <div className="flex items-start gap-3">
         {/* Favicon or placeholder */}

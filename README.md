@@ -46,10 +46,11 @@ Build a web application that:
 - [x] Project setup and framework selection (Next.js + React + TypeScript + Tailwind)
 - [x] API provider selection (SerpAPI + Anthropic Claude)
 - [x] Core search + AI integration (API routes implemented)
-- [x] UI implementation (Perplexity-style interface)
+- [x] UI implementation (Simplexity-style interface)
 - [x] Citations and source linking
 - [x] Conversation management (sessionStorage)
-- [ ] Testing and polish
+- [x] Testing and polish (conversation threading, auto-scroll, loading states)
+- [x] Production deployment ready
 - [ ] Additional features (optional enhancements)
 
 ## Architecture Decisions
@@ -80,7 +81,7 @@ Build a web application that:
 - Rationale: Mentioned in assignment description, reliable results
 
 **LLM API: Anthropic Claude**
-- Claude 3.5 Sonnet for high-quality responses
+- Claude Sonnet 4.5 for high-quality responses
 - Excellent at following citation instructions
 - Strong context understanding for search results
 - Rationale: Better citation accuracy than alternatives, good free tier
@@ -146,15 +147,54 @@ Then add your API keys to `.env.local`:
 1. **Anthropic API Key**: Sign up at https://console.anthropic.com/ (free tier available)
 2. **SerpAPI Key**: Sign up at https://serpapi.com/ (100 free searches/month)
 
+## Screenshots
+
+### 1. Initial State
+![Empty state with search input](docs/screenshots/01-initial-state.png)
+
+Clean interface with "simplexity" branding, centered search input ready for queries.
+
+### 2. Loading State
+![AI processing with skeleton loader](docs/screenshots/02-loading-state.png)
+
+Immediate feedback with pulsing dots and skeleton UI showing expected content structure.
+
+### 3. First Answer with Sources & Citations
+![Complete answer with sources](docs/screenshots/03-first-answer.png)
+
+Comprehensive AI-generated answer with:
+- Horizontal scrollable source cards (Wikipedia, whitehouse.gov)
+- Inline citations as clickable cyan badges [1], [2], [7]
+- Well-structured markdown formatting
+
+### 4. User Typing Follow-Up Question
+![Scrolling through answer with follow-up typed](docs/screenshots/04-typing-followup.png)
+
+Fixed input at bottom allows typing follow-ups while reviewing previous answer. Previous content preserved (conversation threading).
+
+### 5. Second Question Loading - Conversation Threading
+![Second Q&A loading with previous content visible](docs/screenshots/05-second-loading.png)
+
+**Key feature**: Previous Q&A remains visible above. New question displays with loading state. Auto-scroll positions new question at top of viewport.
+
+### 6. Multi-Turn Conversation Complete
+![Full conversation thread with second answer](docs/screenshots/06-second-answer.png)
+
+Second answer fully rendered with fresh sources and citations. Users can scroll up to review entire conversation history.
+
 ## Time Allocation
 
-**Total Time Spent**: ~1.5 hours
+**Total Time Spent**: ~2 hours 45 minutes
 
 ### Breakdown by Phase:
 1. **Planning & Design** (~15 min): Screenshot analysis, architecture planning, component design
 2. **Core Implementation** (~45 min): Type definitions, API routes, state management, UI components
 3. **Debugging & Fixes** (~20 min): File location issues, lucide-react resolution, env configuration
 4. **API Migration** (~10 min): Switched from fetch to official serpapi client library
+5. **UI Polish** (~5 min): Cursor pointer on buttons, button styling
+6. **Branding** (~10 min): Complete Perplexity → Simplexity rename
+7. **Conversation Threading** (~30 min): Multi-turn Q&A display, auto-scroll, fixed input, skeleton loading
+8. **Model Upgrade & Testing** (~50 min): Claude Sonnet 4.5 upgrade, end-to-end testing, documentation
 
 ### What Would Be Improved With More Time
 

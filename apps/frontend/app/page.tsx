@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { SearchInput } from './components/SearchInput';
 import { SourceCard } from './components/SourceCard';
@@ -20,7 +20,9 @@ export default function HomePage() {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('simplexity');
-  const [currentQuery, setCurrentQuery] = useState('');
+  const [loadingSeconds, setLoadingSeconds] = useState(0);
+  const latestQueryRef = useRef<HTMLDivElement>(null);
+  const loadingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load conversation from sessionStorage on mount
   useEffect(() => {
@@ -28,18 +30,48 @@ export default function HomePage() {
     setConversation(conv);
   }, []);
 
+  // Auto-scroll to latest query when new message is added
+  useEffect(() => {
+    if (latestQueryRef.current) {
+      latestQueryRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [conversation?.messages.length]);
+
+  // Stopwatch for loading state
+  useEffect(() => {
+    if (isSearching) {
+      // Reset and start timer
+      setLoadingSeconds(0);
+      loadingIntervalRef.current = setInterval(() => {
+        setLoadingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      // Clear timer when not loading
+      if (loadingIntervalRef.current) {
+        clearInterval(loadingIntervalRef.current);
+        loadingIntervalRef.current = null;
+      }
+      setLoadingSeconds(0);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (loadingIntervalRef.current) {
+        clearInterval(loadingIntervalRef.current);
+      }
+    };
+  }, [isSearching]);
+
   const handleNewChat = () => {
     const newConv = createConversation();
     setConversation(newConv);
     setActiveTab('simplexity');
-    setCurrentQuery('');
   };
 
   const handleSearch = async (query: string) => {
     if (!conversation || isSearching) return;
 
     setIsSearching(true);
-    setCurrentQuery(query);
 
     // Add user query message
     const queryMessage: Message = {
@@ -128,13 +160,19 @@ export default function HomePage() {
     }
   };
 
-  // Get the latest answer message for display
-  const latestAnswer = conversation?.messages
-    .filter((msg) => msg.type === 'answer')
-    .pop();
-
-  const hasResults = latestAnswer && !latestAnswer.isLoading;
   const isEmpty = !conversation || conversation.messages.length === 0;
+
+  // Group messages into Q&A pairs
+  const qaPairs: Array<{ query: Message; answer: Message }> = [];
+  if (conversation) {
+    for (let i = 0; i < conversation.messages.length; i += 2) {
+      const query = conversation.messages[i];
+      const answer = conversation.messages[i + 1];
+      if (query?.type === 'query' && answer?.type === 'answer') {
+        qaPairs.push({ query, answer });
+      }
+    }
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -142,7 +180,7 @@ export default function HomePage() {
 
       {/* Main content area */}
       <main className="ml-16 min-h-screen">
-        {isEmpty || !hasResults ? (
+        {isEmpty ? (
           /* Empty/Initial State */
           <div className="flex flex-col items-center justify-center min-h-screen p-8">
             <div className="w-full max-w-3xl">
@@ -160,72 +198,94 @@ export default function HomePage() {
             </div>
           </div>
         ) : (
-          /* Results State */
-          <div className="max-w-4xl mx-auto p-8 pt-12">
-            {/* Query Display */}
-            <h1 className="text-3xl font-medium mb-8">{currentQuery}</h1>
+          /* Conversation Thread */
+          <div className="max-w-4xl mx-auto p-8 pt-12 pb-24">
+            {qaPairs.map((pair, pairIndex) => {
+              const isLatest = pairIndex === qaPairs.length - 1;
 
-            {/* Tab Navigation */}
-            <TabNavigation
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              sourcesCount={latestAnswer.sources?.length || 0}
-            />
+              return (
+                <div
+                  key={pair.query.id}
+                  ref={isLatest ? latestQueryRef : null}
+                  className="mb-16 scroll-mt-12"
+                >
+                  {/* Query Display */}
+                  <h1 className="text-3xl font-medium mb-8">{pair.query.content}</h1>
 
-            {/* Tab Content */}
-            <div className="mt-6">
-              {activeTab === 'simplexity' && (
-                <div className="space-y-6">
-                  {/* Sources - Horizontal Scroll */}
-                  {latestAnswer.sources && latestAnswer.sources.length > 0 && (
-                    <div className="overflow-x-auto pb-4 -mx-4 px-4">
-                      <div className="flex gap-4">
-                        {latestAnswer.sources.map((source, index) => (
-                          <SourceCard
-                            key={source.link}
-                            source={source}
-                            index={index}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* AI Answer */}
-                  {latestAnswer.isLoading ? (
-                    <div className="flex items-center gap-3 text-zinc-400">
-                      <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" />
-                      <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse delay-75" />
-                      <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse delay-150" />
-                      <span className="ml-2">Thinking...</span>
-                    </div>
-                  ) : (
-                    <AnswerDisplay
-                      answer={latestAnswer.content}
-                      sources={latestAnswer.sources}
+                  {/* Tab Navigation - Only show for latest Q&A */}
+                  {isLatest && (
+                    <TabNavigation
+                      activeTab={activeTab}
+                      onTabChange={setActiveTab}
+                      sourcesCount={pair.answer.sources?.length || 0}
                     />
                   )}
-                </div>
-              )}
 
-              {activeTab === 'sources' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {latestAnswer.sources?.map((source, index) => (
-                    <div key={source.link} className="w-full">
-                      <SourceCard source={source} index={index} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  {/* Answer Content */}
+                  <div className="mt-6">
+                    {activeTab === 'simplexity' || !isLatest ? (
+                      <div className="space-y-6">
+                        {/* Sources - Horizontal Scroll */}
+                        {pair.answer.sources && pair.answer.sources.length > 0 && (
+                          <div className="overflow-x-auto pb-4 -mx-4 px-4">
+                            <div className="flex gap-3">
+                              {pair.answer.sources.map((source, index) => (
+                                <div key={source.link} className="w-72 flex-shrink-0">
+                                  <SourceCard
+                                    source={source}
+                                    index={index}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
-            {/* Follow-up Input */}
-            <div className="mt-12">
-              <SearchInput
-                onSubmit={handleSearch}
-                isLoading={isSearching}
-                placeholder="Ask a follow-up..."
-              />
+                        {/* AI Answer or Loading */}
+                        {pair.answer.isLoading ? (
+                          <div className="space-y-3">
+                            {/* Skeleton loader */}
+                            <div className="flex items-center gap-3 text-zinc-400 mb-6">
+                              <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" />
+                              <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse delay-75" />
+                              <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse delay-150" />
+                              <span className="ml-2">Thinking... {loadingSeconds}s</span>
+                            </div>
+                            {/* Skeleton text lines */}
+                            <div className="space-y-2">
+                              <div className="h-4 bg-zinc-800/50 rounded w-full animate-pulse" />
+                              <div className="h-4 bg-zinc-800/50 rounded w-5/6 animate-pulse delay-75" />
+                              <div className="h-4 bg-zinc-800/50 rounded w-4/5 animate-pulse delay-150" />
+                            </div>
+                          </div>
+                        ) : (
+                          <AnswerDisplay
+                            answer={pair.answer.content}
+                            sources={pair.answer.sources}
+                          />
+                        )}
+                      </div>
+                    ) : activeTab === 'sources' && isLatest ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {pair.answer.sources?.map((source, index) => (
+                          <SourceCard key={source.link} source={source} index={index} />
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Follow-up Input - Fixed at bottom */}
+            <div className="fixed bottom-0 left-16 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-8 pb-6">
+              <div className="max-w-4xl mx-auto px-8">
+                <SearchInput
+                  onSubmit={handleSearch}
+                  isLoading={isSearching}
+                  placeholder="Ask a follow-up..."
+                />
+              </div>
             </div>
           </div>
         )}
