@@ -94,6 +94,12 @@ export const addMessage = (conversationId: string, message: Message): void => {
 
   if (conversation) {
     conversation.messages.push(message);
+
+    // Set conversation title from first query
+    if (!conversation.title && message.type === 'query') {
+      conversation.title = message.content.slice(0, 60) + (message.content.length > 60 ? '...' : '');
+    }
+
     updateConversation(conversation);
   }
 };

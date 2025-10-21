@@ -6,21 +6,28 @@ import { SearchInput } from './components/SearchInput';
 import { SourceCard } from './components/SourceCard';
 import { TabNavigation, type Tab } from './components/TabNavigation';
 import { AnswerDisplay } from './components/AnswerDisplay';
+import { SuggestedQuestions } from './components/SuggestedQuestions';
 import {
   getOrCreateCurrentConversation,
+  getAllConversations,
+  getConversation,
+  getCurrentConversationId,
   addMessage,
   updateMessage,
   createConversation,
   setCurrentConversationId,
+  deleteConversation,
   generateId,
 } from '@/lib/conversationStore';
 import type { Conversation, Message, SearchResult } from '@/lib/types';
 
 export default function HomePage() {
   const [conversation, setConversation] = useState<Conversation | null>(null);
+  const [allConversations, setAllConversations] = useState<Conversation[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('simplexity');
   const [loadingSeconds, setLoadingSeconds] = useState(0);
+  const [generatingQuestions, setGeneratingQuestions] = useState(false);
   const latestQueryRef = useRef<HTMLDivElement>(null);
   const loadingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -28,6 +35,7 @@ export default function HomePage() {
   useEffect(() => {
     const conv = getOrCreateCurrentConversation();
     setConversation(conv);
+    setAllConversations(getAllConversations());
   }, []);
 
   // Auto-scroll to latest query when new message is added
@@ -65,7 +73,66 @@ export default function HomePage() {
   const handleNewChat = () => {
     const newConv = createConversation();
     setConversation(newConv);
+    setAllConversations(getAllConversations());
     setActiveTab('simplexity');
+  };
+
+  const handleSelectConversation = (id: string) => {
+    const selected = getConversation(id);
+    if (selected) {
+      setCurrentConversationId(id);
+      setConversation(selected);
+      setActiveTab('simplexity');
+    }
+  };
+
+  const handleDeleteConversation = (id: string) => {
+    deleteConversation(id);
+    setAllConversations(getAllConversations());
+
+    // If we deleted the current conversation, create a new one
+    if (conversation?.id === id) {
+      const newConv = createConversation();
+      setConversation(newConv);
+      setAllConversations(getAllConversations());
+    }
+  };
+
+  const generateSuggestedQuestions = async (
+    query: string,
+    answer: string,
+    conversationHistory: Message[],
+    answerMessageId: string
+  ) => {
+    if (!conversation) return;
+
+    setGeneratingQuestions(true);
+
+    try {
+      const response = await fetch('/api/suggest-questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentQuery: query,
+          currentAnswer: answer,
+          conversationHistory: conversationHistory.slice(-4),
+        }),
+      });
+
+      if (response.ok) {
+        const { questions } = await response.json();
+
+        // Update answer message with suggested questions
+        updateMessage(conversation.id, answerMessageId, {
+          suggestedQuestions: questions,
+        });
+        setConversation(getOrCreateCurrentConversation());
+      }
+    } catch (error) {
+      console.error('Error generating suggested questions:', error);
+    } finally {
+      setGeneratingQuestions(false);
+    }
   };
 
   const handleSearch = async (query: string) => {
@@ -116,6 +183,7 @@ export default function HomePage() {
 
       // Read streaming results
       const sources: SearchResult[] = [];
+      let fullAnswer = '';
       const reader = searchResponse.body?.getReader();
       const decoder = new TextDecoder();
 
@@ -178,7 +246,6 @@ export default function HomePage() {
 
       if (genReader) {
         let buffer = '';
-        let fullAnswer = '';
         let citations: any[] = [];
 
         while (true) {
@@ -228,6 +295,10 @@ export default function HomePage() {
           }
         }
       }
+
+      // Step 3: Generate suggested questions in background
+      // Don't await - let it run in background
+      generateSuggestedQuestions(query, fullAnswer, conversation.messages, answerMessageId);
     } catch (error) {
       console.error('Search error:', error);
 
@@ -240,6 +311,7 @@ export default function HomePage() {
       setConversation(getOrCreateCurrentConversation());
     } finally {
       setIsSearching(false);
+      setAllConversations(getAllConversations());
     }
   };
 
@@ -259,10 +331,16 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      <Sidebar onNewChat={handleNewChat} />
+      <Sidebar
+        onNewChat={handleNewChat}
+        conversations={allConversations}
+        currentConversationId={conversation?.id || null}
+        onSelectConversation={handleSelectConversation}
+        onDeleteConversation={handleDeleteConversation}
+      />
 
       {/* Main content area */}
-      <main className="ml-16 min-h-screen">
+      <main className="ml-64 min-h-screen">
         {isEmpty ? (
           /* Empty/Initial State */
           <div className="flex flex-col items-center justify-center min-h-screen p-8">
@@ -342,10 +420,20 @@ export default function HomePage() {
                             </div>
                           </div>
                         ) : (
-                          <AnswerDisplay
-                            answer={pair.answer.content}
-                            sources={pair.answer.sources}
-                          />
+                          <>
+                            <AnswerDisplay
+                              answer={pair.answer.content}
+                              sources={pair.answer.sources}
+                            />
+                            {/* Suggested Questions - Only for latest Q&A */}
+                            {isLatest && (
+                              <SuggestedQuestions
+                                questions={pair.answer.suggestedQuestions || []}
+                                onQuestionClick={handleSearch}
+                                isLoading={generatingQuestions}
+                              />
+                            )}
+                          </>
                         )}
                       </div>
                     ) : activeTab === 'sources' && isLatest ? (
@@ -361,7 +449,7 @@ export default function HomePage() {
             })}
 
             {/* Follow-up Input - Fixed at bottom */}
-            <div className="fixed bottom-0 left-16 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-8 pb-6">
+            <div className="fixed bottom-0 left-64 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-8 pb-6">
               <div className="max-w-4xl mx-auto px-8">
                 <SearchInput
                   onSubmit={handleSearch}

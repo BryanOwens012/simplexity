@@ -1,6 +1,7 @@
 // Core conversation types
 export interface Conversation {
   id: string;
+  title?: string; // Generated from first query
   messages: Message[];
   createdAt: number;
 }
@@ -13,6 +14,7 @@ export interface Message {
   citations?: Citation[];
   timestamp: number;
   isLoading?: boolean;
+  suggestedQuestions?: string[]; // AI-generated follow-up questions
 }
 
 // Search-related types
