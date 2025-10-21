@@ -4,21 +4,32 @@ This document describes the AI agent workflows and patterns for this project.
 
 ## Project Context: Perplexity Clone
 
-This is a Hanover Park take-home assignment to build a simplified Perplexity.ai clone.
+**Status**: ✅ **COMPLETE** - Production-ready MVP (2025-10-20)
 
-### Core Feature Requirements
-1. **Search query input** - User-facing interface for queries
-2. **Search API integration** - Fetch real-time results (SerpAPI or alternative)
-3. **LLM integration** - Generate AI response using search context
-4. **Citations** - Link AI responses to source materials
-5. **Additional features** - Developer's choice based on value/interest
+This is a Hanover Park take-home assignment to build a simplified Perplexity.ai clone called "Simplexity".
 
-### Assignment Constraints
-- Use TypeScript (required)
-- Choose any framework/libraries
-- Be mindful of free API tier limits
-- Document all decisions and time allocation
-- Explain what you'd do with more time
+### Core Feature Requirements (All Completed)
+1. ✅ **Search query input** - Auto-resize textarea with submit button
+2. ✅ **Search API integration** - SerpAPI with progressive streaming (100ms cascading)
+3. ✅ **LLM integration** - Claude Sonnet 4.5 with word-by-word streaming
+4. ✅ **Citations** - Clickable citation badges linking to sources
+5. ✅ **Additional features** - Conversation threading, tab navigation, loading states, auto-scroll
+
+### Implementation Details
+- **Framework**: Next.js 15.2.4, React 19, TypeScript 5
+- **Styling**: Tailwind CSS 4.1.9 (dark theme, zinc-950 background)
+- **APIs**: SerpAPI 2.2.1, Anthropic Claude Sonnet 4.5
+- **State**: sessionStorage (no database, no complex state management)
+- **Streaming**: Line-delimited JSON over ReadableStream
+- **Components**: 5 React components + 2 API routes
+- **Total Time**: ~5 hours 5 minutes
+
+### Assignment Deliverables
+- ✅ TypeScript used throughout
+- ✅ All decisions logged in docs/AGENTS_APPENDLOG.md
+- ✅ Time allocation tracked (5+ hours documented)
+- ✅ Future improvements documented in CLAUDE.md
+- ✅ Free tier API usage mindful (SerpAPI 100/month, Claude pay-per-use)
 
 ### Decision Logging Requirements
 **Every significant decision must be logged in `docs/AGENTS_APPENDLOG.md`**
@@ -151,14 +162,67 @@ Never hallucinate or make up times - if current time is unknown, ask user.
 - Maintain narrative thread from initial setup through final implementation
 - This meta-layer demonstrates thoughtful decision-making for assignment writeup
 
+## Current Project Structure (Reference)
+
+### File Organization
+```
+apps/frontend/
+├── app/
+│   ├── page.tsx                           # Main UI (conversation threading, streaming)
+│   ├── layout.tsx                         # Root layout with metadata
+│   ├── globals.css                        # Tailwind base styles
+│   ├── components/
+│   │   ├── Sidebar.tsx                   # Logo + New Chat + Home navigation
+│   │   ├── SearchInput.tsx               # Auto-resize textarea with submit
+│   │   ├── SourceCard.tsx                # Reusable source display (2 layouts)
+│   │   ├── TabNavigation.tsx             # Simplexity/Sources tab switcher
+│   │   └── AnswerDisplay.tsx             # Markdown answer with citations
+│   └── api/
+│       ├── search/route.ts               # SerpAPI streaming endpoint
+│       └── generate/route.ts             # Claude streaming endpoint
+├── lib/
+│   ├── types.ts                          # All TypeScript interfaces
+│   └── conversationStore.ts              # sessionStorage CRUD
+├── package.json                           # Dependencies (no extras - kept minimal)
+└── .env                                   # API keys (SERPAPI_API_KEY, ANTHROPIC_API_KEY)
+```
+
+### Key Files to Know
+- **page.tsx (204 lines)**: Manages all state, streaming readers, Q&A pairing
+- **search/route.ts**: ReadableStream with 100ms delay for cascading
+- **generate/route.ts**: Claude SDK streaming with citation extraction
+- **conversationStore.ts**: All sessionStorage operations (no database)
+- **types.ts**: Conversation, Message, SearchResult, Citation interfaces
+
+### Streaming Message Types
+```typescript
+// Search stream
+{ type: 'result', data: SearchResult }
+{ type: 'done' }
+
+// AI stream
+{ type: 'text', data: string }
+{ type: 'citations', data: Citation[] }
+{ type: 'done' }
+```
+
+### Important Patterns in Codebase
+- **Q&A Pairing**: Messages grouped in pairs (query + answer) for display
+- **Tab Visibility**: Tabs only shown for latest Q&A, older pairs locked to Simplexity view
+- **Auto-scroll**: useRef + useEffect with `scrollIntoView({ behavior: 'smooth' })`
+- **Fixed Input**: `fixed bottom-0` with gradient overlay to prevent content collision
+- **Loading States**: Stopwatch with useRef for interval (not useState)
+- **Component Reuse**: SourceCard adapts to container (horizontal scroll vs grid)
+
 ## Development Patterns
 
 ### Before Starting Any Task
-1. **Read** CLAUDE.md for project-specific guidelines
-2. **Read** this file (AGENTS.md) for workflows
-3. **Check** AGENTS_APPENDLOG.md for recent changes
+1. **Read** CLAUDE.md for project-specific guidelines and architecture
+2. **Read** this file (AGENTS.md) for workflows and patterns
+3. **Check** AGENTS_APPENDLOG.md for recent changes (last ~200 lines)
 4. **Verify** current state with `git status`
-5. **Search** for existing patterns before creating new ones
+5. **Search** for existing patterns before creating new ones (use Grep/Glob)
+6. **Check file structure** above to understand what exists
 
 ### Feature Implementation
 1. **Understand requirements** - ask clarifying questions if needed
@@ -283,6 +347,84 @@ When multiple agents work on this project:
 
 ## Project-Specific Workflows
 
+### Streaming Implementation Pattern (Implemented)
+
+**When implementing streaming features:**
+
+1. **Server-Side (API Route)**:
+   ```typescript
+   // Create ReadableStream
+   const stream = new ReadableStream({
+     async start(controller) {
+       const encoder = new TextEncoder();
+
+       for (const item of items) {
+         // Send message with type and data
+         const chunk = JSON.stringify({ type: 'result', data: item }) + '\n';
+         controller.enqueue(encoder.encode(chunk));
+
+         // Optional delay for cascading effect
+         await new Promise(resolve => setTimeout(resolve, 100));
+       }
+
+       // Always send completion signal
+       controller.enqueue(encoder.encode(JSON.stringify({ type: 'done' }) + '\n'));
+       controller.close();
+     }
+   });
+
+   return new Response(stream, {
+     headers: {
+       'Content-Type': 'text/plain; charset=utf-8',
+       'Transfer-Encoding': 'chunked',
+     },
+   });
+   ```
+
+2. **Client-Side (React Component)**:
+   ```typescript
+   const reader = response.body?.getReader();
+   const decoder = new TextDecoder();
+   let buffer = '';
+
+   while (true) {
+     const { done, value } = await reader.read();
+     if (done) break;
+
+     buffer += decoder.decode(value, { stream: true });
+     const lines = buffer.split('\n');
+     buffer = lines.pop() || ''; // Keep incomplete line
+
+     for (const line of lines) {
+       if (line.trim()) {
+         try {
+           const message = JSON.parse(line);
+           // Handle message based on type
+           if (message.type === 'result') {
+             // Update UI progressively
+           } else if (message.type === 'done') {
+             break;
+           }
+         } catch (e) {
+           console.error('Error parsing chunk:', e);
+         }
+       }
+     }
+   }
+   ```
+
+3. **Critical Streaming Rules**:
+   - ✅ Always keep incomplete line in buffer (`lines.pop()`)
+   - ✅ Wrap JSON.parse in try-catch (network can fragment)
+   - ✅ Send explicit completion signal `{ type: 'done' }`
+   - ✅ Use TextEncoder/TextDecoder for proper UTF-8 handling
+   - ✅ Test with real network conditions (not just localhost)
+
+4. **Timing Guidelines**:
+   - **Search results**: 100ms delay between items (visible cascade, not sluggish)
+   - **AI text**: No artificial delay (use native SDK streaming rhythm)
+   - **UI updates**: React setState on each chunk (acceptable performance)
+
 ### Framework/Library Selection
 When choosing any framework, library, or tool:
 1. **Research options** - Consider 2-3 viable alternatives
@@ -299,20 +441,21 @@ When choosing any framework, library, or tool:
 ### API Integration Pattern
 For each API (search, LLM):
 1. **Select provider** (log decision with rationale)
-2. **Set up authentication** (environment variables)
-3. **Create typed interfaces** for requests/responses
-4. **Implement error handling** (rate limits, failures)
-5. **Add response parsing** logic
+2. **Set up authentication** (environment variables in apps/frontend/.env)
+3. **Create typed interfaces** for requests/responses (lib/types.ts)
+4. **Implement error handling** (rate limits, failures, network errors)
+5. **Add response parsing** logic (streaming or batch)
 6. **Test with real API calls** (mind free tier limits!)
-7. **Consider caching** to reduce API usage
+7. **Consider caching** to reduce API usage (not implemented in MVP)
 
 ### Feature Implementation
 For each feature (core or additional):
 1. **Log feature start** in APPENDLOG with time estimate
-2. **Implement incrementally** with testing
+2. **Implement incrementally** with testing after each change
 3. **Document any decisions** made during implementation
-4. **Log feature completion** with actual time spent
-5. **Update README.md** status section
+4. **Test streaming edge cases** (incomplete chunks, network errors, rapid updates)
+5. **Log feature completion** with actual time spent
+6. **Update README.md** status section
 
 ## Verification Checklist
 

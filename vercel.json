@@ -1,0 +1,22 @@
+{
+  "buildCommand": "cd apps/frontend && npm install && npm run build",
+  "devCommand": "cd apps/frontend && npm run dev",
+  "installCommand": "cd apps/frontend && npm install",
+  "framework": "nextjs",
+  "outputDirectory": "apps/frontend/.next",
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "ANTHROPIC_API_KEY": "@anthropic_api_key",
+    "SERPAPI_API_KEY": "@serpapi_api_key"
+  }
+}
