@@ -6,7 +6,7 @@ This document describes the AI agent workflows and patterns for this project.
 
 **Status**: ✅ **COMPLETE** - Production-ready MVP (2025-10-20)
 
-This is a Hanover Park take-home assignment to build a simplified Perplexity.ai clone called "Simplexity".
+A simplified Perplexity.ai clone called "Simplexity".
 
 ### Core Feature Requirements (All Completed)
 1. ✅ **Search query input** - Auto-resize textarea with submit button
@@ -24,7 +24,7 @@ This is a Hanover Park take-home assignment to build a simplified Perplexity.ai 
 - **Components**: 5 React components + 2 API routes
 - **Total Time**: ~5 hours 5 minutes
 
-### Assignment Deliverables
+### Project Deliverables
 - ✅ TypeScript used throughout
 - ✅ All decisions logged in docs/AGENTS_APPENDLOG.md
 - ✅ Time allocation tracked (5+ hours documented)
@@ -132,11 +132,11 @@ After every significant change:
 - Update CLAUDE.md with new patterns or guidelines
 - Document new components, utilities, and APIs
 - Keep README.md current with setup and usage
-- **Log ALL significant changes in AGENTS_APPENDLOG.md** (critical for take-home)
+- **Log ALL significant changes in AGENTS_APPENDLOG.md** (critical for documentation)
 - **Track conversation flow**: Document user prompts and how they shaped development
 - Periodically summarize decisions from APPENDLOG into README.md
 - Incorporate insights holistically into CLAUDE.md
-- Track time spent on features for final writeup
+- Track time spent on features
 - Ensure documentation reflects actual code (no hallucination)
 
 **Append Log Entry Format:**
@@ -160,7 +160,7 @@ Never hallucinate or make up times - if current time is unknown, ask user.
 - Track user prompts that shaped the project direction
 - Record methodology improvements discovered during development
 - Maintain narrative thread from initial setup through final implementation
-- This meta-layer demonstrates thoughtful decision-making for assignment writeup
+- This meta-layer demonstrates thoughtful decision-making throughout development
 
 ## Current Project Structure (Reference)
 
@@ -473,4 +473,4 @@ Before marking any task as complete:
 - [ ] No unused imports or variables
 - [ ] Todo list updated to reflect completion
 - [ ] **Major decisions logged in AGENTS_APPENDLOG.md**
-- [ ] **Time spent tracked** (for final writeup)
+- [ ] **Time spent tracked**

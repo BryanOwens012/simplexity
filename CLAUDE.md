@@ -1,7 +1,7 @@
 # Claude Code Instructions
 
 ## Project Overview
-**Hanover Park Take-Home Assignment**: Build a Perplexity.ai clone
+Build a Perplexity.ai clone
 
 **Status**: ✅ **COMPLETE** - Production-ready MVP with streaming, conversation threading, and professional UX
 
@@ -35,7 +35,7 @@
   - Enhanced source card styling
   - Fixed follow-up input
 
-### Assignment Philosophy
+### Development Philosophy
 - Open-book: Use any tools, AI, libraries normally used
 - Intentionally vague specification: Exercise best judgment
 - Document decisions and rationale
@@ -327,7 +327,7 @@ This project has evolved through multiple sessions (2025-10-20):
 - This project documents not just code decisions, but also the conversation flow that drives development
 - User prompts and requests are tracked in AGENTS_APPENDLOG.md to show reasoning evolution
 - CLAUDE.md serves as both instructions and a living record of project methodology
-- This meta-layer helps explain decision-making process for the take-home assignment writeup
+- This meta-layer helps explain the decision-making process and project evolution
 
 ### Implementation Insights (2025-10-20)
 

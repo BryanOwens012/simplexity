@@ -26,7 +26,6 @@ NOTE: Timestamps must be accurate with PT timezone. Do not hallucinate times.
   - `/docs/AGENTS.md`
   - `/docs/AGENTS_APPENDLOG.md`
 - **Notes:**
-  - Project is a Hanover Park take-home assignment
   - WhichGLP is a GLP-1 drug comparison platform
   - Frontend-only monorepo currently (Next.js 15)
   - Uses Supabase backend, tRPC for API layer
@@ -337,7 +336,7 @@ Followed by course correction:
 ### Issues Encountered & Resolved:
 
 **1. File Location Confusion**
-- **Problem**: Components/lib created in wrong directory (`/Users/bryan/Github/hanover-takehome/` instead of `/apps/frontend/`)
+- **Problem**: Components/lib created in wrong directory (`/Users/bryan/Github/simplexity/` instead of `/apps/frontend/`)
 - **Solution**: Moved all files to correct `apps/frontend/` location
 - **Learning**: Verify working directory before creating files
 

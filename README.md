@@ -116,8 +116,8 @@ Click a suggested question to instantly explore further.
 
 ```bash
 # Clone repository
-git clone https://github.com/[username]/hanover-takehome.git
-cd hanover-takehome/apps/frontend
+git clone https://github.com/[username]/simplexity.git
+cd simplexity/apps/frontend
 
 # Install dependencies
 npm install
@@ -257,4 +257,4 @@ MIT License
 
 ---
 
-**Built by Bryan Owens for Hanover Park**
+**Built by Bryan Owens**
