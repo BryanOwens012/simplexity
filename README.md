@@ -1,10 +1,10 @@
 # Simplexity
 
-A Perplexity.ai clone built with Next.js, TypeScript, and Claude AI.
+[simplexity.chat](https://simplexity.chat)
 
-**Live Demo:** [https://hanover-takehome.vercel.app/](https://hanover-takehome.vercel.app/)
+A Perplexity.ai clone built with Next.js, TypeScript, SerpAPI, and Claude AI.
 
-**Video Explanation:** [https://drive.google.com/file/d/16_68To1lwZIpEqIGbpiLxVGZRyxSguGK/view?usp=drive_link](https://drive.google.com/file/d/16_68To1lwZIpEqIGbpiLxVGZRyxSguGK/view?usp=drive_link)
+Built solo in ~2 hours using AI-assisted development.
 
 ## Features
 
