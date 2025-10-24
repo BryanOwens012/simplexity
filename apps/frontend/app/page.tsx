@@ -340,7 +340,7 @@ export default function HomePage() {
       />
 
       {/* Main content area */}
-      <main className="ml-64 min-h-screen">
+      <main className="md:ml-64 min-h-screen">
         {isEmpty ? (
           /* Empty/Initial State */
           <div className="flex flex-col items-center justify-center min-h-screen p-8">
@@ -361,6 +361,21 @@ export default function HomePage() {
         ) : (
           /* Conversation Thread */
           <div className="max-w-4xl mx-auto p-8 pt-12 pb-24">
+            {/* Mobile Logo - Only visible on mobile */}
+            <div className="md:hidden flex items-center justify-center gap-3 mb-8">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="w-7 h-7 text-cyan-400"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
+              </svg>
+              <span className="text-lg font-light text-zinc-300">simplexity</span>
+            </div>
             {qaPairs.map((pair, pairIndex) => {
               const isLatest = pairIndex === qaPairs.length - 1;
 
@@ -449,7 +464,7 @@ export default function HomePage() {
             })}
 
             {/* Follow-up Input - Fixed at bottom */}
-            <div className="fixed bottom-0 left-64 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-8 pb-6">
+            <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-8 pb-6">
               <div className="max-w-4xl mx-auto px-8">
                 <SearchInput
                   onSubmit={handleSearch}

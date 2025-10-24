@@ -19,7 +19,7 @@ export const Sidebar = ({
   onDeleteConversation
 }: SidebarProps) => {
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col py-4">
+    <aside className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-zinc-900 border-r border-zinc-800 flex-col py-4">
       {/* Logo and New Chat */}
       <div className="px-4 pb-4 border-b border-zinc-800">
         {/* Logo */}
