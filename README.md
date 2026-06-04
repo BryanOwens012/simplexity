@@ -45,6 +45,7 @@ Built solo in ~2 hours using AI-assisted development.
 - **Anthropic Claude Sonnet 4.5** - AI answer generation
 - **SerpAPI** - Google search results
 - **ReadableStream** - Progressive UI updates
+- **Renovate** - Automated dependency updates (weekly grouped PRs, configured in `renovate.json`)
 
 ## Screenshots
 
