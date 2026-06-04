@@ -3224,3 +3224,36 @@ export const SourceCard = ({ source, index, onAskAboutSource }: SourceCardProps)
 
 **Status Update:** Core mobile responsiveness complete. App now provides appropriate UX for both mobile and desktop users.
 
+
+---
+
+## 2026-06-04 11:36 PT - Migrate from Dependabot to Renovate
+
+**Prompt:** User requested removing Dependabot and replacing it with Renovate, pattern-matched off the migration in `template-claude-nextjs-node`, plus closing all open Dependabot PRs. New branch + new PR.
+
+**Changes:**
+- Deleted `.github/dependabot.yml` (monthly grouped npm updates for `/apps/frontend`)
+- Added root `renovate.json` copied from `template-claude-nextjs-node` (its PR #57 migration):
+  - `config:recommended` base
+  - All updates grouped into a single weekly PR (Mondays 9am ET)
+  - `lockFileMaintenance` enabled on the same cadence
+  - `prConcurrentLimit: 1`, no major/minor/patch separation
+- Renovate auto-discovers `apps/frontend/package.json` — no per-directory config needed
+
+**PR:** #18 (`chore/migrate-dependabot-to-renovate`)
+
+**Dependabot PRs closed** (with comment pointing to #18, remote branches deleted):
+- #13 `@anthropic-ai/sdk` 0.88.0 → 0.91.1
+- #15 `next` 16.2.3 → 16.2.6
+- #16 `postcss` 8.5.9 → 8.5.10
+- #17 grouped all-dependencies bump (9 updates)
+
+**Rationale:**
+- Consistency across repos: `template-claude-nextjs-node` already migrated; one dependency-update tool to reason about
+- Renovate's grouping + `lockFileMaintenance` produces fewer, more consolidated PRs than Dependabot's per-directory model
+- Auto-discovery removes the need to update config when packages move
+
+**Follow-up Actions (manual):**
+- Install the Renovate GitHub App on this repo: https://github.com/apps/renovate
+- Merge Renovate's onboarding PR once it opens
+- Confirm first weekly run opens one grouped "all dependencies" PR
