@@ -41,7 +41,7 @@ Built solo in ~2 hours using AI-assisted development.
 - **Next.js 15.2.4** - App Router, React Server Components, API Routes
 - **React 19** - Concurrent rendering
 - **TypeScript 5** - Full type safety
-- **Tailwind CSS 4.1.9** - Styling
+- **Tailwind CSS 4.x** - Styling (v4 native: `@import "tailwindcss"`, `@tailwindcss/postcss`, `bg-linear-to-*` gradients)
 - **Anthropic Claude Sonnet 4.5** - AI answer generation
 - **SerpAPI** - Google search results
 - **ReadableStream** - Progressive UI updates

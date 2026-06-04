@@ -67,7 +67,7 @@ export const Sidebar = ({
               `}
               onClick={() => onSelectConversation(conv.id)}
             >
-              <MessageSquare className="w-4 h-4 flex-shrink-0" />
+              <MessageSquare className="w-4 h-4 shrink-0" />
               <span className="text-sm flex-1 truncate">
                 {conv.title || 'New conversation'}
               </span>
