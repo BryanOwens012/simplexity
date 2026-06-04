@@ -28,7 +28,7 @@ export const SourceCard = ({ source, index }: SourceCardProps) => {
     >
       <div className="flex items-start gap-3">
         {/* Favicon or placeholder */}
-        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-xs text-zinc-500 overflow-hidden">
+        <div className="shrink-0 w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-xs text-zinc-500 overflow-hidden">
           {source.favicon ? (
             <img
               src={source.favicon}
@@ -54,7 +54,7 @@ export const SourceCard = ({ source, index }: SourceCardProps) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
             <p className="text-sm text-zinc-400 truncate">{getDomain(source.link)}</p>
-            <ExternalLink className="w-3 h-3 text-zinc-600 group-hover:text-zinc-400 transition-colors flex-shrink-0" />
+            <ExternalLink className="w-3 h-3 text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
           </div>
           <h3 className="text-sm font-medium text-white line-clamp-2 mb-1">
             {source.title}

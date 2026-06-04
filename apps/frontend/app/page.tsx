@@ -406,7 +406,7 @@ export default function HomePage() {
                           <div className="overflow-x-auto pb-4 -mx-4 px-4">
                             <div className="flex gap-3">
                               {pair.answer.sources.map((source, index) => (
-                                <div key={source.link} className="w-72 flex-shrink-0">
+                                <div key={source.link} className="w-72 shrink-0">
                                   <SourceCard
                                     source={source}
                                     index={index}
@@ -464,7 +464,7 @@ export default function HomePage() {
             })}
 
             {/* Follow-up Input - Fixed at bottom */}
-            <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent pt-8 pb-6">
+            <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-linear-to-t from-zinc-950 via-zinc-950 to-transparent pt-8 pb-6">
               <div className="max-w-4xl mx-auto px-8">
                 <SearchInput
                   onSubmit={handleSearch}

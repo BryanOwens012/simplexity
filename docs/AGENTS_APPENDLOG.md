@@ -3257,3 +3257,34 @@ export const SourceCard = ({ source, index, onAskAboutSource }: SourceCardProps)
 - Install the Renovate GitHub App on this repo: https://github.com/apps/renovate
 - Merge Renovate's onboarding PR once it opens
 - Confirm first weekly run opens one grouped "all dependencies" PR
+
+---
+
+## 2026-06-04 11:51 PT - Tailwind v4 Compliance Audit & Fixes
+
+**Prompt:** User requested migrating from Tailwind v3 to v4. Audit revealed the codebase was already on v4.2.2 (built on v4 from day one per CLAUDE.md), but contained two v4 breaking-change violations from v3-era class names:
+
+**Breaking Changes Fixed:**
+
+1. **`flex-shrink-0` → `shrink-0`** (deprecated in v3, removed in v4.1+)
+   - `app/page.tsx` (1 occurrence)
+   - `app/components/SourceCard.tsx` (2 occurrences)
+   - `app/components/Sidebar.tsx` (1 occurrence)
+
+2. **`bg-gradient-to-t` → `bg-linear-to-t`** (gradient utilities renamed in v4)
+   - `app/page.tsx` (1 occurrence, the fixed footer gradient overlay)
+
+**Items Audited and Found Correct for v4:**
+- CSS: already uses `@import "tailwindcss"`, `@custom-variant dark`, `@theme inline` (v4 syntax)
+- PostCSS: already uses `@tailwindcss/postcss` (v4, not `tailwindcss`)
+- `outline-none`: changed behavior in v4 (now `outline-style: none`), correct for textarea use case
+- `border` classes: all have explicit colors; not affected by v4's `currentColor` default change
+- `ring` classes: not used bare; not affected by v4's 1px default change
+- `cursor-pointer`: explicitly set on all interactive elements; covers v4's `cursor: default` button change
+- `rounded` / `shadow-*`: named scales (md, lg, xl, 2xl, full) are unchanged in v4
+- `@layer base` in globals.css: still valid in v4 (only `@layer utilities`/`@layer components` moved to `@utility`)
+- No `@tailwind` directives, no JS tailwind.config.js, no `autoprefixer` in PostCSS
+
+**Build:** Passes with zero errors after changes.
+
+**README:** Updated Tailwind entry to reflect v4-native setup.
