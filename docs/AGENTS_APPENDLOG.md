@@ -3288,3 +3288,13 @@ export const SourceCard = ({ source, index, onAskAboutSource }: SourceCardProps)
 **Build:** Passes with zero errors after changes.
 
 **README:** Updated Tailwind entry to reflect v4-native setup.
+
+## 2026-09-23 14:32 PT - Remove Renovate
+
+**Prompt:** User requested uninstalling Renovate from every repo they had installed it in, with the repo docs updated so they no longer claim Renovate is present.
+
+**Changes:**
+- Deleted root `renovate.json`
+- README: removed the Renovate entry from the tech stack list
+
+**Note:** The Renovate GitHub App installation is removed separately in GitHub settings; deleting the config alone does not uninstall the app.
