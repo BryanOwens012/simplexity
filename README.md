@@ -38,7 +38,7 @@ Built solo in ~2 hours using AI-assisted development.
 
 ## Tech Stack
 
-- **Next.js 15.2.4** - App Router, React Server Components, API Routes
+- **Next.js 16** - App Router, React Server Components, API Routes
 - **React 19** - Concurrent rendering
 - **TypeScript 5** - Full type safety
 - **Tailwind CSS 4.x** - Styling (v4 native: `@import "tailwindcss"`, `@tailwindcss/postcss`, `bg-linear-to-*` gradients)
