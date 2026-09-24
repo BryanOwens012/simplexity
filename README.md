@@ -108,7 +108,7 @@ Click a suggested question to instantly explore further.
 
 ### Prerequisites
 
-- Node.js 20.17.0 or higher
+- Node.js 24.0.0 or higher
 - [Anthropic API key](https://console.anthropic.com/)
 - [SerpAPI key](https://serpapi.com/) (250 free searches/month)
 
