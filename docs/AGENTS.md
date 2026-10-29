@@ -27,7 +27,7 @@ A simplified Perplexity.ai clone called "Simplexity".
 ### Project Deliverables
 - ✅ TypeScript used throughout
 - ✅ All decisions logged in docs/AGENTS_APPENDLOG.md
-- ✅ Time allocation tracked (5+ hours documented)
+- ✅ Time allocation logged per entry in docs/AGENTS_APPENDLOG.md
 - ✅ Future improvements documented in CLAUDE.md
 - ✅ Free tier API usage mindful (SerpAPI 250/month, Claude pay-per-use)
 

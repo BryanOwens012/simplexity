@@ -282,17 +282,8 @@ while (true) {
 - **Auto-scroll**: `scrollIntoView({ behavior: 'smooth', block: 'start' })` with `scroll-mt-12` offset
 - **Fixed Input**: `fixed bottom-0` with gradient overlay (`bg-gradient-to-t from-zinc-950`)
 
-### Time Allocation (Final Metrics)
-**Total**: not restated here; each entry's `Time Spent` in `docs/AGENTS_APPENDLOG.md` is the record. The rows below are the larger items from the first sessions.
-- Planning & Architecture: 15 min
-- Core Implementation: 45 min
-- Debugging (file locations, module resolution): 20 min
-- API Migration (switch to serpapi client): 10 min
-- UI Polish (cursor-pointer, shadows): 5 min
-- Branding (Perplexity → Simplexity rename): 10 min
-- Conversation Threading: 30 min
-- Model Upgrade & Testing: 50 min
-- Streaming Implementation (search + AI): 2 hours 20 min
+### Time Allocation
+Each entry's `Time Spent` in `docs/AGENTS_APPENDLOG.md` is the record; no total is restated here.
 
 ### Future Enhancements (Not Implemented)
 **Would Add with More Time:**
