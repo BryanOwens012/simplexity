@@ -4,7 +4,7 @@
 
 A Perplexity.ai clone built with Next.js, TypeScript, SerpAPI, and Claude AI.
 
-Built solo in ~2 hours using AI-assisted development.
+Built solo using AI-assisted development; time allocation is logged in `docs/AGENTS_APPENDLOG.md`.
 
 ## Features
 
@@ -13,7 +13,7 @@ Built solo in ~2 hours using AI-assisted development.
 - Inline citations with clickable source badges
 - Progressive streaming (search results cascade in, answers appear word-by-word)
 - Multi-turn conversations with persistent history
-- Auto-generated conversation titles
+- Conversation titles taken from the first question
 - AI-generated suggested follow-up questions
 - Tab navigation between answer view and sources grid
 - sessionStorage persistence (survives page refresh)
@@ -84,9 +84,9 @@ Answer appears word-by-word as Claude generates it, with inline citations.
 ---
 
 ### 6. Conversation History
-![Multiple conversations with auto-generated titles](docs/screenshots/15-multiple-convos.png)
+![Multiple conversations with titles from the first question](docs/screenshots/15-multiple-convos.png)
 
-Sidebar shows all past conversations with auto-generated titles and delete option.
+Sidebar shows all past conversations, titled from the first question, with a delete option.
 
 ---
 
@@ -168,7 +168,11 @@ apps/frontend/
 │       └── suggest-questions/route.ts
 ├── lib/
 │   ├── types.ts                   # TypeScript interfaces
-│   └── conversationStore.ts       # sessionStorage CRUD
+│   ├── conversationStore.ts       # sessionStorage CRUD
+│   ├── claudeModel.ts             # Runtime cheapest-Haiku selection
+│   ├── answerStream.ts            # Claude stream -> answer chunks + citations
+│   ├── suggestedQuestions.ts      # Parses follow-up questions from Claude's reply
+│   └── *.test.ts                  # Vitest suites (npm test)
 └── package.json
 ```
 

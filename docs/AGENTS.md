@@ -16,20 +16,20 @@ A simplified Perplexity.ai clone called "Simplexity".
 5. ✅ **Additional features** - Conversation threading, tab navigation, loading states, auto-scroll
 
 ### Implementation Details
-- **Framework**: Next.js 15.2.4, React 19, TypeScript 5
-- **Styling**: Tailwind CSS 4.1.9 (dark theme, zinc-950 background)
+- **Framework**: Next.js 16, React 19, TypeScript 5
+- **Styling**: Tailwind CSS 4.x (dark theme, zinc-950 background)
 - **APIs**: SerpAPI 2.2.1, Anthropic Claude Haiku (cheapest available, chosen at runtime)
 - **State**: sessionStorage (no database, no complex state management)
 - **Streaming**: Line-delimited JSON over ReadableStream
-- **Components**: 5 React components + 2 API routes
-- **Total Time**: ~5 hours 5 minutes
+- **Components**: one component per file in `app/components/`; one endpoint per `app/api/<name>/route.ts`
+- **Total Time**: see the `Time Spent` entries in `docs/AGENTS_APPENDLOG.md`
 
 ### Project Deliverables
 - ✅ TypeScript used throughout
 - ✅ All decisions logged in docs/AGENTS_APPENDLOG.md
-- ✅ Time allocation tracked (5+ hours documented)
+- ✅ Time allocation logged per entry in docs/AGENTS_APPENDLOG.md
 - ✅ Future improvements documented in CLAUDE.md
-- ✅ Free tier API usage mindful (SerpAPI 100/month, Claude pay-per-use)
+- ✅ Free tier API usage mindful (SerpAPI 250/month, Claude pay-per-use)
 
 ### Decision Logging Requirements
 **Every significant decision must be logged in `docs/AGENTS_APPENDLOG.md`**
@@ -172,25 +172,32 @@ apps/frontend/
 │   ├── layout.tsx                         # Root layout with metadata
 │   ├── globals.css                        # Tailwind base styles
 │   ├── components/
-│   │   ├── Sidebar.tsx                   # Logo + New Chat + Home navigation
+│   │   ├── Sidebar.tsx                   # Logo + New Chat + conversation history (switch/delete)
 │   │   ├── SearchInput.tsx               # Auto-resize textarea with submit
 │   │   ├── SourceCard.tsx                # Reusable source display (2 layouts)
 │   │   ├── TabNavigation.tsx             # Simplexity/Sources tab switcher
-│   │   └── AnswerDisplay.tsx             # Markdown answer with citations
+│   │   ├── AnswerDisplay.tsx             # Markdown answer with citations
+│   │   └── SuggestedQuestions.tsx        # Clickable AI follow-up questions
 │   └── api/
 │       ├── search/route.ts               # SerpAPI streaming endpoint
-│       └── generate/route.ts             # Claude streaming endpoint
+│       ├── generate/route.ts             # Claude streaming endpoint
+│       └── suggest-questions/route.ts    # Claude-generated follow-up questions
 ├── lib/
 │   ├── types.ts                          # All TypeScript interfaces
-│   └── conversationStore.ts              # sessionStorage CRUD
+│   ├── conversationStore.ts              # sessionStorage CRUD
+│   ├── claudeModel.ts                    # Runtime cheapest-Haiku selection + message helpers
+│   ├── answerStream.ts                   # Claude stream -> answer chunks, citations, stop notices
+│   ├── suggestedQuestions.ts             # Parses follow-up questions out of Claude's reply
+│   └── *.test.ts                         # Vitest suites for the three modules above
 ├── package.json                           # Dependencies (no extras - kept minimal)
 └── .env                                   # API keys (SERPAPI_API_KEY, ANTHROPIC_API_KEY)
 ```
 
 ### Key Files to Know
-- **page.tsx (204 lines)**: Manages all state, streaming readers, Q&A pairing
+- **page.tsx**: Manages all state, streaming readers, Q&A pairing
 - **search/route.ts**: ReadableStream with 100ms delay for cascading
-- **generate/route.ts**: Claude SDK streaming with citation extraction
+- **generate/route.ts**: Claude SDK streaming; `lib/answerStream.ts` turns the stream into chunks and extracts citations
+- **claudeModel.ts**: Every Claude call goes through `createHaikuMessage` / `streamHaikuMessage`; never hardcode a model id
 - **conversationStore.ts**: All sessionStorage operations (no database)
 - **types.ts**: Conversation, Message, SearchResult, Citation interfaces
 

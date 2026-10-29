@@ -12,10 +12,10 @@ Build a Perplexity.ai clone
   - ✅ Citations linking to sources
 - ✅ **Tech Stack Finalized**:
   - **Core Dependencies**:
-    - Next.js 15.2.4, React 19, TypeScript 5
-    - Tailwind CSS 4.1.9
+    - Next.js 16, React 19, TypeScript 5 (Node >= 24)
+    - Tailwind CSS 4.x
     - lucide-react 0.454.0 (icons)
-    - clsx 2.1.1, tailwind-merge 2.5.5 (styling utilities)
+    - clsx 2.1.1, tailwind-merge 2.x (styling utilities)
   - **APIs (Production)**:
     - Search API: SerpAPI 2.2.1 (official JavaScript client)
     - LLM API: Anthropic, cheapest available Haiku chosen at runtime (@anthropic-ai/sdk 0.91)
@@ -38,6 +38,8 @@ Build a Perplexity.ai clone
   - Auto-scroll to latest query
   - Enhanced source card styling
   - Fixed follow-up input
+  - Conversation history sidebar (switch and delete past conversations, titled from the first question)
+  - AI-generated suggested follow-up questions (`/api/suggest-questions`)
 
 ### Development Philosophy
 - Open-book: Use any tools, AI, libraries normally used
@@ -144,20 +146,26 @@ Build a Perplexity.ai clone
 ```
 apps/frontend/
 ├── app/
-│   ├── page.tsx                    # Main conversation UI with streaming (204 lines)
+│   ├── page.tsx                    # Main conversation UI with streaming
 │   ├── layout.tsx                  # Root layout with metadata
 │   ├── components/
-│   │   ├── Sidebar.tsx            # Navigation + New Chat button
+│   │   ├── Sidebar.tsx            # Logo, New Chat, conversation history (switch/delete)
 │   │   ├── SearchInput.tsx        # Auto-resize textarea with submit
 │   │   ├── SourceCard.tsx         # Source display (reusable in 2 layouts)
 │   │   ├── TabNavigation.tsx      # Simplexity/Sources tab switcher
-│   │   └── AnswerDisplay.tsx      # Markdown answer with clickable citations
+│   │   ├── AnswerDisplay.tsx      # Markdown answer with clickable citations
+│   │   └── SuggestedQuestions.tsx # Clickable AI follow-up questions
 │   └── api/
 │       ├── search/route.ts        # SerpAPI streaming (ReadableStream + 100ms delay)
-│       └── generate/route.ts      # Claude streaming (native SDK streaming)
+│       ├── generate/route.ts      # Claude streaming (native SDK streaming)
+│       └── suggest-questions/route.ts # Claude-generated follow-up questions
 ├── lib/
-│   ├── types.ts                   # All TypeScript interfaces (117 lines)
-│   └── conversationStore.ts       # sessionStorage CRUD operations (158 lines)
+│   ├── types.ts                   # All TypeScript interfaces
+│   ├── conversationStore.ts       # sessionStorage CRUD operations
+│   ├── claudeModel.ts             # Runtime cheapest-Haiku selection + message helpers
+│   ├── answerStream.ts            # Claude stream -> answer chunks, citations, stop notices
+│   ├── suggestedQuestions.ts      # Parses follow-up questions out of Claude's reply
+│   └── *.test.ts                  # Vitest suites for the three modules above
 ```
 
 ### Data Flow (Streaming Architecture)
@@ -259,7 +267,7 @@ while (true) {
 ## Project-Specific Considerations
 
 ### API Usage (Production Metrics)
-- **SerpAPI Free Tier**: 100 searches/month
+- **SerpAPI Free Tier**: 250 searches/month ([pricing](https://serpapi.com/pricing))
 - **Claude Cost**: whichever Haiku is current, at its [list price](https://www.anthropic.com/pricing) for ~2000 input + 500 output tokens plus low-effort thinking; a fraction of a cent per query
 - **Total Cost per Q&A**: ~$0.01, dominated by SerpAPI
 - **Error Handling**: Graceful fallbacks with user-friendly messages
@@ -274,30 +282,20 @@ while (true) {
 - **Auto-scroll**: `scrollIntoView({ behavior: 'smooth', block: 'start' })` with `scroll-mt-12` offset
 - **Fixed Input**: `fixed bottom-0` with gradient overlay (`bg-gradient-to-t from-zinc-950`)
 
-### Time Allocation (Final Metrics)
-**Total: ~5 hours 5 minutes**
-- Planning & Architecture: 15 min
-- Core Implementation: 45 min
-- Debugging (file locations, module resolution): 20 min
-- API Migration (switch to serpapi client): 10 min
-- UI Polish (cursor-pointer, shadows): 5 min
-- Branding (Perplexity → Simplexity rename): 10 min
-- Conversation Threading: 30 min
-- Model Upgrade & Testing: 50 min
-- Streaming Implementation (search + AI): 2 hours 20 min
+### Time Allocation
+Time allocation: see each entry's `Time Spent` in `docs/AGENTS_APPENDLOG.md`.
 
 ### Future Enhancements (Not Implemented)
 **Would Add with More Time:**
 1. **Performance**: Debounce React re-renders during fast streaming
 2. **Caching**: Cache search results to reduce API costs
-3. **Conversation History**: Sidebar with list of past searches
-4. **Export**: Download conversation as markdown
-5. **Retry Logic**: Auto-retry failed streams
-6. **Progress Indicators**: Show % complete during streaming
-7. **Mobile Responsive**: Optimize for mobile viewports
-8. **Unit Tests**: Test streaming protocol, state management, components
-9. **Error Recovery**: Better error messages + retry buttons
-10. **Keyboard Shortcuts**: Cmd+K for new chat, Cmd+Enter to submit
+3. **Export**: Download conversation as markdown
+4. **Retry Logic**: Auto-retry failed streams
+5. **Progress Indicators**: Show % complete during streaming
+6. **Mobile Responsive**: Optimize for mobile viewports
+7. **Tests for components, API routes, and `conversationStore.ts`**
+8. **Error Recovery**: Better error messages + retry buttons
+9. **Keyboard Shortcuts**: Cmd+K for new chat, Cmd+Enter to submit
 
 ## Meta: Project Development History
 
