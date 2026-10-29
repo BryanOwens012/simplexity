@@ -4,7 +4,7 @@
 
 A Perplexity.ai clone built with Next.js, TypeScript, SerpAPI, and Claude AI.
 
-Built solo in ~2 hours using AI-assisted development.
+Built solo in ~5 hours 45 minutes using AI-assisted development.
 
 ## Features
 
@@ -168,7 +168,11 @@ apps/frontend/
 │       └── suggest-questions/route.ts
 ├── lib/
 │   ├── types.ts                   # TypeScript interfaces
-│   └── conversationStore.ts       # sessionStorage CRUD
+│   ├── conversationStore.ts       # sessionStorage CRUD
+│   ├── claudeModel.ts             # Runtime cheapest-Haiku selection
+│   ├── answerStream.ts            # Claude stream -> answer chunks + citations
+│   ├── suggestedQuestions.ts      # Parses follow-up questions from Claude's reply
+│   └── *.test.ts                  # Vitest suites (npm test)
 └── package.json
 ```
 
