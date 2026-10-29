@@ -22,7 +22,7 @@ A simplified Perplexity.ai clone called "Simplexity".
 - **State**: sessionStorage (no database, no complex state management)
 - **Streaming**: Line-delimited JSON over ReadableStream
 - **Components**: one component per file in `app/components/`; one endpoint per `app/api/<name>/route.ts`
-- **Total Time**: not restated here; see the `Time Spent` entries in `AGENTS_APPENDLOG.md`
+- **Total Time**: see the `Time Spent` entries in `docs/AGENTS_APPENDLOG.md`
 
 ### Project Deliverables
 - ✅ TypeScript used throughout

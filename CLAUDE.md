@@ -283,7 +283,7 @@ while (true) {
 - **Fixed Input**: `fixed bottom-0` with gradient overlay (`bg-gradient-to-t from-zinc-950`)
 
 ### Time Allocation
-Each entry's `Time Spent` in `docs/AGENTS_APPENDLOG.md` is the record; no total is restated here.
+Time allocation: see each entry's `Time Spent` in `docs/AGENTS_APPENDLOG.md`.
 
 ### Future Enhancements (Not Implemented)
 **Would Add with More Time:**
