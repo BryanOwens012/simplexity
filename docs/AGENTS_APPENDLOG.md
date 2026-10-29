@@ -3312,3 +3312,10 @@ export const SourceCard = ({ source, index, onAskAboutSource }: SourceCardProps)
 - Added Vitest (`npm test`) with tests for the selector, effort gating, caching, and the retire-and-retry path.
 
 **Not verified:** a live call against the Anthropic API (no key on the development machine), and answer quality on Haiku versus Sonnet 4.5.
+
+## 2026-10-28 18:50 PT - Harden the Haiku selection after review
+
+**Changes (from /bryan-review of PR #32):**
+- `lib/claudeModel.ts` exposes `createHaikuMessage` / `streamHaikuMessage` instead of a wrapper plus a param builder. The model choice is re-read hourly, the last good choice is kept if the Models API call fails, and a retired model is forgotten only if it is still the cached one. Capability fields are null-guarded at every level.
+- Streamed answers go through `lib/answerStream.ts`, which also tells the user when Claude refused or ran out of tokens (before or after partial text). Suggested questions are parsed in `lib/suggestedQuestions.ts`.
+- Tests grew from 13 to 32 and cover the stream handling and question parsing.

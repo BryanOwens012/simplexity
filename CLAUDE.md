@@ -18,7 +18,11 @@ Build a Perplexity.ai clone
     - clsx 2.1.1, tailwind-merge 2.5.5 (styling utilities)
   - **APIs (Production)**:
     - Search API: SerpAPI 2.2.1 (official JavaScript client)
-    - LLM API: Anthropic, cheapest available Haiku chosen at runtime (@anthropic-ai/sdk 0.91). Never hardcode a model id: call through `withCheapestHaiku`/`buildHaikuParams` in `lib/claudeModel.ts`, which picks the newest `claude-haiku-*` from the Models API, sets `effort: 'low'` only where the model supports it, and re-selects once on a 404. Haiku thinks by default, so read `text` blocks by type (never `content[0]`) and leave `max_tokens` room for thinking
+    - LLM API: Anthropic, cheapest available Haiku chosen at runtime (@anthropic-ai/sdk 0.91)
+      - Never hardcode a model id: call `createHaikuMessage` / `streamHaikuMessage` in `lib/claudeModel.ts`. They pick the newest `claude-haiku-*` from the Models API (re-read hourly; the last good choice is kept if the list call fails), send `effort: 'low'` only where the model supports it, and re-select once on a 404.
+      - Haiku thinks by default: read `text` blocks by type, never `content[0]` (`lib/suggestedQuestions.ts`), and leave `max_tokens` room for thinking.
+      - Streamed answers go through `lib/answerStream.ts`, which skips thinking and tells the user when Claude refused or ran out of tokens.
+      - Tests: `npm test` (Vitest, `lib/*.test.ts`).
   - **State Management**: sessionStorage (vanilla React hooks, no Redux/Zustand)
   - **Not Used** (intentionally kept minimal):
     - ❌ TanStack Query (not needed - simple fetch with streaming)
@@ -256,8 +260,8 @@ while (true) {
 
 ### API Usage (Production Metrics)
 - **SerpAPI Free Tier**: 100 searches/month
-- **Claude Haiku 5.5 Cost**: ~$0.0005 per query at $0.10/$0.50 per MTok (2000 input + 500 output tokens, plus thinking)
-- **Total Cost per Q&A**: ~$0.011 (SerpAPI ~$0.01 + Claude ~$0.0005)
+- **Claude Cost**: whichever Haiku is current, at its [list price](https://www.anthropic.com/pricing) for ~2000 input + 500 output tokens plus low-effort thinking; a fraction of a cent per query
+- **Total Cost per Q&A**: ~$0.01, dominated by SerpAPI
 - **Error Handling**: Graceful fallbacks with user-friendly messages
 - **No Caching**: MVP doesn't cache results (future enhancement to reduce costs)
 - **Rate Limiting**: Not implemented (low usage for demo, would add for production)

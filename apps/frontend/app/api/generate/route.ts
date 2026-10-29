@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import type { GenerateRequest, GenerateResponse, Citation } from '@/lib/types';
-import { buildHaikuParams, withCheapestHaiku } from '@/lib/claudeModel';
-
-const REFUSAL_MESSAGE = "I can't help with that request.";
+import type { GenerateRequest, GenerateResponse } from '@/lib/types';
+import { streamHaikuMessage } from '@/lib/claudeModel';
+import { toAnswerChunks } from '@/lib/answerStream';
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -72,74 +71,23 @@ Please provide a comprehensive answer to the user's question, using inline citat
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const messageStream = await withCheapestHaiku(anthropic, (haiku) =>
-            anthropic.messages.create(
-              buildHaikuParams(haiku, {
-                // Thinking counts toward this cap, so leave room beyond the answer itself
-                max_tokens: 4096,
-                system: systemPrompt,
-                messages: [
-                  {
-                    role: 'user' as const,
-                    content: userPrompt,
-                  },
-                ],
-                stream: true as const,
-              })
-            )
-          );
+          const messageStream = await streamHaikuMessage(anthropic, {
+            // Thinking counts toward this cap, so leave room beyond the answer itself
+            max_tokens: 4096,
+            system: systemPrompt,
+            messages: [
+              {
+                role: 'user',
+                content: userPrompt,
+              },
+            ],
+            stream: true,
+          });
 
-          let fullText = '';
-
-          for await (const event of messageStream) {
-            if (event.type === 'content_block_delta') {
-              if (event.delta.type === 'text_delta') {
-                const text = event.delta.text;
-                fullText += text;
-
-                // Send text chunk
-                const chunk = JSON.stringify({ type: 'text', data: text }) + '\n';
-                controller.enqueue(encoder.encode(chunk));
-              }
-            } else if (event.type === 'message_delta' && event.delta.stop_reason === 'refusal') {
-              console.warn('Claude declined to answer the query');
-              if (fullText.length === 0) {
-                const chunk = JSON.stringify({ type: 'text', data: REFUSAL_MESSAGE }) + '\n';
-                controller.enqueue(encoder.encode(chunk));
-              }
-            } else if (event.type === 'message_stop') {
-              // Extract citations from full text
-              const citationRegex = /\[(\d+)\]/g;
-              const citationMatches = [...fullText.matchAll(citationRegex)];
-
-              const citations: Citation[] = citationMatches.map((match) => {
-                const sourceIndex = parseInt(match[1], 10) - 1;
-                return {
-                  number: parseInt(match[1], 10),
-                  sourceIndex: sourceIndex >= 0 && sourceIndex < sources.length ? sourceIndex : 0,
-                  text: match[0],
-                };
-              });
-
-              // Remove duplicate citations
-              const uniqueCitations = citations.filter(
-                (citation, index, self) =>
-                  index === self.findIndex((c) => c.number === citation.number)
-              );
-
-              // Send citations
-              const citationsChunk = JSON.stringify({
-                type: 'citations',
-                data: uniqueCitations
-              }) + '\n';
-              controller.enqueue(encoder.encode(citationsChunk));
-
-              // Send done signal
-              const doneChunk = JSON.stringify({ type: 'done' }) + '\n';
-              controller.enqueue(encoder.encode(doneChunk));
-              controller.close();
-            }
+          for await (const chunk of toAnswerChunks(messageStream, sources.length)) {
+            controller.enqueue(encoder.encode(JSON.stringify(chunk) + '\n'));
           }
+          controller.close();
         } catch (error) {
           console.error('Streaming error:', error);
           controller.error(error);

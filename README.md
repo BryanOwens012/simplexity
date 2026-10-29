@@ -131,6 +131,9 @@ cp .env.example .env
 
 # Run development server
 npm run dev
+
+# Run tests (Vitest)
+npm test
 ```
 
 Visit [http://localhost:3000](http://localhost:3000)
@@ -186,16 +189,11 @@ for (let i = 0; i < results.length; i++) {
 **AI Answers:**
 ```typescript
 // Stream Claude's response immediately
-const messageStream = await withCheapestHaiku(anthropic, (haiku) =>
-  anthropic.messages.create(buildHaikuParams(haiku, { stream: true /* ... */ }))
-);
+const messageStream = await streamHaikuMessage(anthropic, { stream: true /* ... */ });
 
-for await (const event of messageStream) {
-  if (event.type === 'content_block_delta') {
-    controller.enqueue(encoder.encode(
-      JSON.stringify({ type: 'text', data: event.delta.text }) + '\n'
-    ));
-  }
+// Text as it arrives, then citations and done (lib/answerStream.ts)
+for await (const chunk of toAnswerChunks(messageStream, sources.length)) {
+  controller.enqueue(encoder.encode(JSON.stringify(chunk) + '\n'));
 }
 ```
 
