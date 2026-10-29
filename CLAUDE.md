@@ -38,7 +38,7 @@ Build a Perplexity.ai clone
   - Auto-scroll to latest query
   - Enhanced source card styling
   - Fixed follow-up input
-  - Conversation history sidebar (switch and delete past conversations, auto-generated titles)
+  - Conversation history sidebar (switch and delete past conversations, titled from the first question)
   - AI-generated suggested follow-up questions (`/api/suggest-questions`)
 
 ### Development Philosophy
@@ -267,7 +267,7 @@ while (true) {
 ## Project-Specific Considerations
 
 ### API Usage (Production Metrics)
-- **SerpAPI Free Tier**: 250 searches/month, 50/hour ([pricing](https://serpapi.com/pricing))
+- **SerpAPI Free Tier**: 250 searches/month ([pricing](https://serpapi.com/pricing))
 - **Claude Cost**: whichever Haiku is current, at its [list price](https://www.anthropic.com/pricing) for ~2000 input + 500 output tokens plus low-effort thinking; a fraction of a cent per query
 - **Total Cost per Q&A**: ~$0.01, dominated by SerpAPI
 - **Error Handling**: Graceful fallbacks with user-friendly messages
@@ -283,7 +283,7 @@ while (true) {
 - **Fixed Input**: `fixed bottom-0` with gradient overlay (`bg-gradient-to-t from-zinc-950`)
 
 ### Time Allocation (Final Metrics)
-**Total: ~5 hours 45 minutes**
+**Total: ~6 hours 20 minutes** (sum of the `Time Spent` entries in `docs/AGENTS_APPENDLOG.md`; the rows below are the larger items, not an exhaustive sum)
 - Planning & Architecture: 15 min
 - Core Implementation: 45 min
 - Debugging (file locations, module resolution): 20 min
@@ -303,7 +303,7 @@ while (true) {
 4. **Retry Logic**: Auto-retry failed streams
 5. **Progress Indicators**: Show % complete during streaming
 6. **Mobile Responsive**: Optimize for mobile viewports
-7. **Component and API-route tests**: `lib/` has Vitest coverage; components, routes, and `conversationStore.ts` have none
+7. **Tests for components, API routes, and `conversationStore.ts`**
 8. **Error Recovery**: Better error messages + retry buttons
 9. **Keyboard Shortcuts**: Cmd+K for new chat, Cmd+Enter to submit
 
