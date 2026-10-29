@@ -3298,3 +3298,17 @@ export const SourceCard = ({ source, index, onAskAboutSource }: SourceCardProps)
 - README: removed the Renovate entry from the tech stack list
 
 **Note:** The Renovate GitHub App installation is removed separately in GitHub settings; deleting the config alone does not uninstall the app.
+
+## 2026-10-28 18:25 PT - Use the cheapest available Claude Haiku, chosen at runtime
+
+**Prompt:** User asked for every LLM call to use the cheapest Haiku, picked automatically so new model releases and deprecations never need a code edit.
+
+**Changes:**
+- New `lib/claudeModel.ts`: lists models via the Anthropic Models API, picks the newest `claude-haiku-*` by release date, and caches the choice per server instance. A 404 for the chosen model resets the cache and retries once.
+- The Models API returns no prices, so "cheapest" is a heuristic: the newest Haiku. Today that is Claude Haiku 5.5 ($0.10/$0.50 per MTok), a tenth of Haiku 4.5's price.
+- Both routes (`generate`, `suggest-questions`) moved from `claude-sonnet-4-5-20250929` to the selected Haiku with `effort: 'low'` (sent only when the model's `capabilities` says it is supported).
+- Haiku 5.5 thinks by default: `suggest-questions` now reads text blocks by type instead of `content[0]`, and both `max_tokens` caps were raised (2048 to 4096, 300 to 1024) so thinking cannot crowd out the answer.
+- Haiku 5.5 can refuse with no server-side fallback; `generate` now streams a short refusal message instead of an empty answer.
+- Added Vitest (`npm test`) with tests for the selector, effort gating, caching, and the retire-and-retry path.
+
+**Not verified:** a live call against the Anthropic API (no key on the development machine), and answer quality on Haiku versus Sonnet 4.5.

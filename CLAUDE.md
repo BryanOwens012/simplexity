@@ -18,7 +18,7 @@ Build a Perplexity.ai clone
     - clsx 2.1.1, tailwind-merge 2.5.5 (styling utilities)
   - **APIs (Production)**:
     - Search API: SerpAPI 2.2.1 (official JavaScript client)
-    - LLM API: Anthropic Claude Sonnet 4.5 (@anthropic-ai/sdk 0.67.0)
+    - LLM API: Anthropic, cheapest available Haiku chosen at runtime (@anthropic-ai/sdk 0.91). Never hardcode a model id: call through `withCheapestHaiku`/`buildHaikuParams` in `lib/claudeModel.ts`, which picks the newest `claude-haiku-*` from the Models API, sets `effort: 'low'` only where the model supports it, and re-selects once on a 404. Haiku thinks by default, so read `text` blocks by type (never `content[0]`) and leave `max_tokens` room for thinking
   - **State Management**: sessionStorage (vanilla React hooks, no Redux/Zustand)
   - **Not Used** (intentionally kept minimal):
     - ❌ TanStack Query (not needed - simple fetch with streaming)
@@ -256,8 +256,8 @@ while (true) {
 
 ### API Usage (Production Metrics)
 - **SerpAPI Free Tier**: 100 searches/month
-- **Claude Sonnet 4.5 Cost**: ~$0.015 per query (2000 input + 500 output tokens)
-- **Total Cost per Q&A**: ~$0.025 (SerpAPI ~$0.01 + Claude ~$0.015)
+- **Claude Haiku 5.5 Cost**: ~$0.0005 per query at $0.10/$0.50 per MTok (2000 input + 500 output tokens, plus thinking)
+- **Total Cost per Q&A**: ~$0.011 (SerpAPI ~$0.01 + Claude ~$0.0005)
 - **Error Handling**: Graceful fallbacks with user-friendly messages
 - **No Caching**: MVP doesn't cache results (future enhancement to reduce costs)
 - **Rate Limiting**: Not implemented (low usage for demo, would add for production)

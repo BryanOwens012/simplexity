@@ -9,7 +9,7 @@ Built solo in ~2 hours using AI-assisted development.
 ## Features
 
 - Real-time web search via SerpAPI (Google results)
-- AI-powered answers using Claude Sonnet 4.5
+- AI-powered answers using the cheapest available Claude Haiku, chosen at runtime
 - Inline citations with clickable source badges
 - Progressive streaming (search results cascade in, answers appear word-by-word)
 - Multi-turn conversations with persistent history
@@ -42,7 +42,7 @@ Built solo in ~2 hours using AI-assisted development.
 - **React 19** - Concurrent rendering
 - **TypeScript 5** - Full type safety
 - **Tailwind CSS 4.x** - Styling (v4 native: `@import "tailwindcss"`, `@tailwindcss/postcss`, `bg-linear-to-*` gradients)
-- **Anthropic Claude Sonnet 4.5** - AI answer generation
+- **Anthropic Claude Haiku** - AI answer generation; `lib/claudeModel.ts` picks the newest Haiku the API key can use, so new releases and retirements need no code change
 - **SerpAPI** - Google search results
 - **ReadableStream** - Progressive UI updates
 
@@ -186,11 +186,9 @@ for (let i = 0; i < results.length; i++) {
 **AI Answers:**
 ```typescript
 // Stream Claude's response immediately
-const messageStream = await anthropic.messages.create({
-  model: 'claude-sonnet-4-5-20250929',
-  stream: true,
-  // ...
-});
+const messageStream = await withCheapestHaiku(anthropic, (haiku) =>
+  anthropic.messages.create(buildHaikuParams(haiku, { stream: true /* ... */ }))
+);
 
 for await (const event of messageStream) {
   if (event.type === 'content_block_delta') {

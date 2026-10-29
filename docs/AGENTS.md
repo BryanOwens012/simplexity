@@ -11,14 +11,14 @@ A simplified Perplexity.ai clone called "Simplexity".
 ### Core Feature Requirements (All Completed)
 1. ✅ **Search query input** - Auto-resize textarea with submit button
 2. ✅ **Search API integration** - SerpAPI with progressive streaming (100ms cascading)
-3. ✅ **LLM integration** - Claude Sonnet 4.5 with word-by-word streaming
+3. ✅ **LLM integration** - cheapest available Claude Haiku (chosen at runtime) with word-by-word streaming
 4. ✅ **Citations** - Clickable citation badges linking to sources
 5. ✅ **Additional features** - Conversation threading, tab navigation, loading states, auto-scroll
 
 ### Implementation Details
 - **Framework**: Next.js 15.2.4, React 19, TypeScript 5
 - **Styling**: Tailwind CSS 4.1.9 (dark theme, zinc-950 background)
-- **APIs**: SerpAPI 2.2.1, Anthropic Claude Sonnet 4.5
+- **APIs**: SerpAPI 2.2.1, Anthropic Claude Haiku (cheapest available, chosen at runtime)
 - **State**: sessionStorage (no database, no complex state management)
 - **Streaming**: Line-delimited JSON over ReadableStream
 - **Components**: 5 React components + 2 API routes

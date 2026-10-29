@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import type { GenerateRequest, GenerateResponse, Citation } from '@/lib/types';
+import { buildHaikuParams, withCheapestHaiku } from '@/lib/claudeModel';
+
+const REFUSAL_MESSAGE = "I can't help with that request.";
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -69,18 +72,22 @@ Please provide a comprehensive answer to the user's question, using inline citat
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const messageStream = await anthropic.messages.create({
-            model: 'claude-sonnet-4-5-20250929',
-            max_tokens: 2048,
-            system: systemPrompt,
-            messages: [
-              {
-                role: 'user',
-                content: userPrompt,
-              },
-            ],
-            stream: true,
-          });
+          const messageStream = await withCheapestHaiku(anthropic, (haiku) =>
+            anthropic.messages.create(
+              buildHaikuParams(haiku, {
+                // Thinking counts toward this cap, so leave room beyond the answer itself
+                max_tokens: 4096,
+                system: systemPrompt,
+                messages: [
+                  {
+                    role: 'user' as const,
+                    content: userPrompt,
+                  },
+                ],
+                stream: true as const,
+              })
+            )
+          );
 
           let fullText = '';
 
@@ -92,6 +99,12 @@ Please provide a comprehensive answer to the user's question, using inline citat
 
                 // Send text chunk
                 const chunk = JSON.stringify({ type: 'text', data: text }) + '\n';
+                controller.enqueue(encoder.encode(chunk));
+              }
+            } else if (event.type === 'message_delta' && event.delta.stop_reason === 'refusal') {
+              console.warn('Claude declined to answer the query');
+              if (fullText.length === 0) {
+                const chunk = JSON.stringify({ type: 'text', data: REFUSAL_MESSAGE }) + '\n';
                 controller.enqueue(encoder.encode(chunk));
               }
             } else if (event.type === 'message_stop') {

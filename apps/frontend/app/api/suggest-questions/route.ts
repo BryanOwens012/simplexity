@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { Message } from '@/lib/types';
+import { buildHaikuParams, withCheapestHaiku } from '@/lib/claudeModel';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -37,19 +38,26 @@ Generate questions that:
 Return ONLY the questions, one per line, without numbering, bullets, or any other formatting.`;
 
     // Generate questions using Claude
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 300,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    const response = await withCheapestHaiku(anthropic, (haiku) =>
+      anthropic.messages.create(
+        buildHaikuParams(haiku, {
+          // Thinking counts toward this cap, so leave room beyond the questions themselves
+          max_tokens: 1024,
+          messages: [
+            {
+              role: 'user' as const,
+              content: prompt,
+            },
+          ],
+        })
+      )
+    );
 
-    // Extract questions from response
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    // Extract questions from response; thinking blocks can precede the text block
+    const text = response.content
+      .filter((block) => block.type === 'text')
+      .map((block) => block.text)
+      .join('\n');
     const questions = text
       .split('\n')
       .map((q) => q.trim())
