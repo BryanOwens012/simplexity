@@ -6,6 +6,8 @@ const HAIKU_ID_PREFIX = 'claude-haiku-';
 // How long one model choice is trusted before the model list is read again, so a long-lived
 // server instance moves to a newly released Haiku without a restart
 export const HAIKU_REFRESH_MS = 60 * 60 * 1000;
+// After a failed model-list call, how long the last good choice is used before listing again
+export const HAIKU_RETRY_MS = 60 * 1000;
 
 export type HaikuModel = {
   id: string;
@@ -39,6 +41,7 @@ export const selectCheapestHaiku = (models: ModelInfo[]): HaikuModel | null => {
 type CachedChoice = {
   promise: Promise<HaikuModel>;
   fetchedAt: number;
+  ttlMs: number;
   // Set once the lookup resolves, so a retired model is only forgotten if it is still the cached one
   id?: string;
 };
@@ -65,24 +68,29 @@ const fetchCheapestHaiku = async (client: Anthropic): Promise<HaikuModel> => {
 };
 
 export const getCheapestHaiku = (client: Anthropic, now = Date.now()): Promise<HaikuModel> => {
-  if (cachedChoice && now - cachedChoice.fetchedAt < HAIKU_REFRESH_MS) {
+  if (cachedChoice && now - cachedChoice.fetchedAt < cachedChoice.ttlMs) {
     return cachedChoice.promise;
   }
 
   const choice: CachedChoice = {
     fetchedAt: now,
+    ttlMs: HAIKU_REFRESH_MS,
     promise: fetchCheapestHaiku(client).then(
       (haiku) => {
         choice.id = haiku.id;
         return haiku;
       },
       (error: unknown) => {
+        const fallback = lastGoodHaiku;
         if (cachedChoice === choice) {
-          cachedChoice = null;
+          // Back off briefly with the last good choice rather than re-listing on every request
+          cachedChoice = fallback
+            ? { promise: Promise.resolve(fallback), fetchedAt: now, ttlMs: HAIKU_RETRY_MS, id: fallback.id }
+            : null;
         }
-        if (lastGoodHaiku) {
-          console.warn(`Could not list Claude models; keeping ${lastGoodHaiku.id}`, error);
-          return lastGoodHaiku;
+        if (fallback) {
+          console.warn(`Could not list Claude models; keeping ${fallback.id}`, error);
+          return fallback;
         }
         throw error;
       }

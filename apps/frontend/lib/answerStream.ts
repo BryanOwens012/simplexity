@@ -31,13 +31,14 @@ export const extractCitations = (text: string, sourceCount: number): Citation[] 
 
 /**
  * Turn Claude's stream events into the chunks the answer UI reads: text as it arrives (thinking is
- * skipped), a notice if Claude refused or ran out of tokens, then citations and done.
+ * skipped), a notice if Claude refused, ran out of tokens or the stream ended early, then citations and done.
  */
 export const toAnswerChunks = async function* (
   events: AsyncIterable<Anthropic.RawMessageStreamEvent>,
   sourceCount: number
 ): AsyncGenerator<AnswerChunk> {
   let fullText = '';
+  const toNotice = (notice: string): AnswerChunk => ({ type: 'text', data: fullText.length === 0 ? notice : `\n\n${notice}` });
 
   for await (const event of events) {
     if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
@@ -47,7 +48,7 @@ export const toAnswerChunks = async function* (
       const notice = STOP_NOTICES[event.delta.stop_reason];
       if (notice) {
         console.warn(`Claude stopped with ${event.delta.stop_reason} after ${fullText.length} characters of answer`);
-        yield { type: 'text', data: fullText.length === 0 ? notice : `\n\n${notice}` };
+        yield toNotice(notice);
       }
     } else if (event.type === 'message_stop') {
       yield { type: 'citations', data: extractCitations(fullText, sourceCount) };
@@ -55,4 +56,10 @@ export const toAnswerChunks = async function* (
       return;
     }
   }
+
+  // The stream ended without message_stop, so the answer may be cut off
+  console.warn(`Claude's stream ended early after ${fullText.length} characters of answer`);
+  yield toNotice(INCOMPLETE_ANSWER_MESSAGE);
+  yield { type: 'citations', data: extractCitations(fullText, sourceCount) };
+  yield { type: 'done' };
 };

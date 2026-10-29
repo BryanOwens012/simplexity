@@ -5,6 +5,7 @@ import {
   createHaikuMessage,
   getCheapestHaiku,
   HAIKU_REFRESH_MS,
+  HAIKU_RETRY_MS,
   resetCheapestHaiku,
   selectCheapestHaiku,
   streamHaikuMessage,
@@ -112,14 +113,17 @@ describe('getCheapestHaiku', () => {
     expect(list).toHaveBeenCalledTimes(2);
   });
 
-  it('keeps the last good choice when the model list cannot be read', async () => {
+  it('keeps the last good choice when the model list cannot be read, and backs off before listing again', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const { client, list } = makeClient([AVAILABLE_MODELS, new Error('overloaded'), AVAILABLE_MODELS]);
+    const releasedLater = [...AVAILABLE_MODELS, makeModel('claude-haiku-6', '2027-03-01T00:00:00Z')];
+    const { client, list } = makeClient([AVAILABLE_MODELS, new Error('overloaded'), releasedLater]);
 
     await getCheapestHaiku(client, 0);
     await expect(getCheapestHaiku(client, HAIKU_REFRESH_MS)).resolves.toMatchObject({ id: 'claude-haiku-5-5' });
-    // The failed refresh is not cached, so the next request lists again
-    await getCheapestHaiku(client, HAIKU_REFRESH_MS);
+    await expect(getCheapestHaiku(client, HAIKU_REFRESH_MS + HAIKU_RETRY_MS - 1)).resolves.toMatchObject({ id: 'claude-haiku-5-5' });
+    expect(list).toHaveBeenCalledTimes(2);
+
+    await expect(getCheapestHaiku(client, HAIKU_REFRESH_MS + HAIKU_RETRY_MS)).resolves.toMatchObject({ id: 'claude-haiku-6' });
     expect(list).toHaveBeenCalledTimes(3);
   });
 
@@ -174,14 +178,24 @@ describe('createHaikuMessage', () => {
 
   it('keeps a newer choice made by a concurrent request that hit the same retirement', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const { client, list } = makeClient([AVAILABLE_MODELS, WITHOUT_NEWEST_HAIKU], async ({ model }) => {
+    const { client, list, createMessage } = makeClient([AVAILABLE_MODELS, WITHOUT_NEWEST_HAIKU], async ({ model }) => {
       if (model === 'claude-haiku-5-5') {
         throw makeNotFoundError();
       }
-      return 'ok';
+      return `ok:${model}`;
     });
 
-    await Promise.all([createHaikuMessage(client, MESSAGE_PARAMS), createHaikuMessage(client, MESSAGE_PARAMS)]);
+    const results = await Promise.all([createHaikuMessage(client, MESSAGE_PARAMS), createHaikuMessage(client, MESSAGE_PARAMS)]);
+    expect(results).toEqual(['ok:claude-haiku-4-5-20251001', 'ok:claude-haiku-4-5-20251001']);
+    expect(createMessage.mock.calls.map(([params]) => params.model).sort()).toEqual([
+      'claude-haiku-4-5-20251001',
+      'claude-haiku-4-5-20251001',
+      'claude-haiku-5-5',
+      'claude-haiku-5-5',
+    ]);
+    expect(list).toHaveBeenCalledTimes(2);
+    // The second request's 404 did not throw away the replacement the first one chose
+    await expect(getCheapestHaiku(client)).resolves.toMatchObject({ id: 'claude-haiku-4-5-20251001' });
     expect(list).toHaveBeenCalledTimes(2);
   });
 
@@ -215,5 +229,18 @@ describe('streamHaikuMessage', () => {
       model: 'claude-haiku-5-5',
       output_config: { effort: 'low' },
     });
+  });
+
+  it('re-selects once and retries when the chosen model is retired', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { client, createMessage } = makeClient([AVAILABLE_MODELS, WITHOUT_NEWEST_HAIKU], async ({ model }) => {
+      if (model === 'claude-haiku-5-5') {
+        throw makeNotFoundError();
+      }
+      return `stream:${model}`;
+    });
+
+    await expect(streamHaikuMessage(client, { ...MESSAGE_PARAMS, stream: true })).resolves.toBe('stream:claude-haiku-4-5-20251001');
+    expect(createMessage).toHaveBeenLastCalledWith({ ...MESSAGE_PARAMS, stream: true, model: 'claude-haiku-4-5-20251001' });
   });
 });

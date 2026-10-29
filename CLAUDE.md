@@ -19,9 +19,9 @@ Build a Perplexity.ai clone
   - **APIs (Production)**:
     - Search API: SerpAPI 2.2.1 (official JavaScript client)
     - LLM API: Anthropic, cheapest available Haiku chosen at runtime (@anthropic-ai/sdk 0.91)
-      - Never hardcode a model id: call `createHaikuMessage` / `streamHaikuMessage` in `lib/claudeModel.ts`. They pick the newest `claude-haiku-*` from the Models API (re-read hourly; the last good choice is kept if the list call fails), send `effort: 'low'` only where the model supports it, and re-select once on a 404.
+      - Never hardcode a model id: call `createHaikuMessage` / `streamHaikuMessage` in `lib/claudeModel.ts`. They pick the newest `claude-haiku-*` from the Models API (re-read hourly; if the list call fails, the last good choice is used and the list retried after a minute), send `effort: 'low'` only where the model supports it, and re-select once on a 404.
       - Haiku thinks by default: read `text` blocks by type, never `content[0]` (`lib/suggestedQuestions.ts`), and leave `max_tokens` room for thinking.
-      - Streamed answers go through `lib/answerStream.ts`, which skips thinking and tells the user when Claude refused or ran out of tokens.
+      - Streamed answers go through `lib/answerStream.ts`, which skips thinking and tells the user when Claude refused, ran out of tokens, or the stream ended early.
       - Tests: `npm test` (Vitest, `lib/*.test.ts`).
   - **State Management**: sessionStorage (vanilla React hooks, no Redux/Zustand)
   - **Not Used** (intentionally kept minimal):

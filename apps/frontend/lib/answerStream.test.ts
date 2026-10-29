@@ -49,10 +49,23 @@ describe('toAnswerChunks', () => {
 
   it('appends the refusal message after partial text', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const chunks = await collectChunks([textDelta('Partial'), stopWith('refusal'), MESSAGE_STOP]);
-    expect(chunks.slice(0, 2)).toEqual([
-      { type: 'text', data: 'Partial' },
+    const chunks = await collectChunks([textDelta('Partial [1]'), stopWith('refusal'), MESSAGE_STOP]);
+    expect(chunks).toEqual([
+      { type: 'text', data: 'Partial [1]' },
       { type: 'text', data: `\n\n${REFUSAL_MESSAGE}` },
+      { type: 'citations', data: [{ number: 1, sourceIndex: 0, text: '[1]' }] },
+      { type: 'done' },
+    ]);
+  });
+
+  it('appends the incomplete-answer message when tokens run out after partial text', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const chunks = await collectChunks([textDelta('Half an'), stopWith('max_tokens'), MESSAGE_STOP]);
+    expect(chunks).toEqual([
+      { type: 'text', data: 'Half an' },
+      { type: 'text', data: `\n\n${INCOMPLETE_ANSWER_MESSAGE}` },
+      { type: 'citations', data: [] },
+      { type: 'done' },
     ]);
   });
 
@@ -67,9 +80,15 @@ describe('toAnswerChunks', () => {
     expect(chunks.filter((chunk) => chunk.type === 'text')).toEqual([{ type: 'text', data: 'Done.' }]);
   });
 
-  it('ends without citations when the stream stops early', async () => {
-    const chunks = await collectChunks([textDelta('Cut')]);
-    expect(chunks).toEqual([{ type: 'text', data: 'Cut' }]);
+  it('tells the user and still finishes when the stream ends without message_stop', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(await collectChunks([textDelta('Cut [1]')])).toEqual([
+      { type: 'text', data: 'Cut [1]' },
+      { type: 'text', data: `\n\n${INCOMPLETE_ANSWER_MESSAGE}` },
+      { type: 'citations', data: [{ number: 1, sourceIndex: 0, text: '[1]' }] },
+      { type: 'done' },
+    ]);
+    expect((await collectChunks([]))[0]).toEqual({ type: 'text', data: INCOMPLETE_ANSWER_MESSAGE });
   });
 });
 
