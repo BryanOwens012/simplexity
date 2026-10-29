@@ -21,8 +21,8 @@ A simplified Perplexity.ai clone called "Simplexity".
 - **APIs**: SerpAPI 2.2.1, Anthropic Claude Haiku (cheapest available, chosen at runtime)
 - **State**: sessionStorage (no database, no complex state management)
 - **Streaming**: Line-delimited JSON over ReadableStream
-- **Components**: one `.tsx` per file in `app/components/`; one endpoint per `app/api/<name>/route.ts`
-- **Total Time**: ~6 hours 20 minutes (sum of the `Time Spent` entries in `AGENTS_APPENDLOG.md`)
+- **Components**: one component per file in `app/components/`; one endpoint per `app/api/<name>/route.ts`
+- **Total Time**: not restated here; see the `Time Spent` entries in `AGENTS_APPENDLOG.md`
 
 ### Project Deliverables
 - ✅ TypeScript used throughout

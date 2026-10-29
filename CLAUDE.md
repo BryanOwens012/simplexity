@@ -283,7 +283,7 @@ while (true) {
 - **Fixed Input**: `fixed bottom-0` with gradient overlay (`bg-gradient-to-t from-zinc-950`)
 
 ### Time Allocation (Final Metrics)
-**Total: ~6 hours 20 minutes** (sum of the `Time Spent` entries in `docs/AGENTS_APPENDLOG.md`; the rows below are the larger items, not an exhaustive sum)
+**Total**: not restated here; each entry's `Time Spent` in `docs/AGENTS_APPENDLOG.md` is the record. The rows below are the larger items from the first sessions.
 - Planning & Architecture: 15 min
 - Core Implementation: 45 min
 - Debugging (file locations, module resolution): 20 min
@@ -293,7 +293,6 @@ while (true) {
 - Conversation Threading: 30 min
 - Model Upgrade & Testing: 50 min
 - Streaming Implementation (search + AI): 2 hours 20 min
-- Conversation history + suggested questions: 40 min
 
 ### Future Enhancements (Not Implemented)
 **Would Add with More Time:**
