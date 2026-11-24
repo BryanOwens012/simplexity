@@ -3335,3 +3335,15 @@ export const SourceCard = ({ source, index, onAskAboutSource }: SourceCardProps)
 **Verified on Node 26.13.1:** `tsc --noEmit`, 34 tests, `next build` (which fails on a planted type error, so the TypeScript 7 check is real), and the dev server rendering the home page.
 
 **Not verified:** a live query end to end (no SerpAPI or Anthropic key on the development machine).
+
+## 2026-11-23 23:41 PT - Drop `npm` from the app's dependencies
+
+**Prompt:** User asked to remove `npm` from `apps/frontend` dependencies, the source of every remaining audit finding.
+
+**Changes:**
+- Removed `npm` from `dependencies` (144 packages out of the lockfile, deletions only). It was added by commit 1cd56da ("Upgrade next, npm, react"), merged through GitHub PR #1 ("Upgrade Next.js to patch vulnerability"); the likely cause, unconfirmed, is `npm install npm` run inside the app. Nothing imports or runs it: the scripts call `next` and `vitest`, and `vercel.json`'s `npm install` and `npm run build` use the build image's npm.
+- `npm audit`: 32 moderate entries to 0. The 32 came from two advisories, on `glob` and `minimatch`, inside npm's dependency tree.
+
+**Verified on Node 26.13.1:** a frozen `npm ci` in a clean worktree (0 vulnerabilities, lockfile untouched), `tsc --noEmit`, 34 tests, `next build`. The Vercel preview build of the change is READY.
+
+**Not verified:** a live query end to end (no SerpAPI or Anthropic key on the development machine).
