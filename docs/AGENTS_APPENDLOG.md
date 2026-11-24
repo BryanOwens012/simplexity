@@ -3319,3 +3319,17 @@ export const SourceCard = ({ source, index, onAskAboutSource }: SourceCardProps)
 - `lib/claudeModel.ts` exposes `createHaikuMessage` / `streamHaikuMessage` instead of a wrapper plus a param builder. The model choice is re-read hourly, the last good choice is kept if the Models API call fails, and a retired model is forgotten only if it is still the cached one. Capability fields are null-guarded at every level.
 - Streamed answers go through `lib/answerStream.ts`, which also tells the user when Claude refused or ran out of tokens (before or after partial text). Suggested questions are parsed in `lib/suggestedQuestions.ts`.
 - Tests grew from 13 to 32 and cover the stream handling and question parsing.
+
+## 2026-11-23 22:58 PT - Node 26, TypeScript 7, safe dependency upgrades
+
+**Prompt:** User asked to upgrade Node to 26.x and TypeScript to v7, then added `/upgrade-deps`.
+
+**Changes:**
+- `engines.node` `>=24.0.0` to `>=26.0.0`; `@types/node` `^24` to `^26`.
+- `typescript` `^5` to `^7`. Next.js 16.4 type-checks through the project's own `tsc` CLI by default (`experimental.useTypeScriptCli`), which is what makes TypeScript 7 work: it has no JavaScript compiler API yet. Leave that option at its default; setting it to `false` breaks `next build`.
+- Same-major upgrades via `/upgrade-deps`: next 16.4.6, react/react-dom 19.3.1, tailwindcss and @tailwindcss/postcss 4.3.5, vitest 5.1.0, npm 11.21.2. The npm audit went from 1 critical, 3 high, 35 moderate to 33 moderate (the critical was in `next`).
+- Majors reported, not taken: @anthropic-ai/sdk 1.x, lucide-react 1.x, tailwind-merge 3.x, npm 12.
+
+**Verified on Node 26.13.1:** `tsc --noEmit`, 34 tests, `next build` (which fails on a planted type error, so the TypeScript 7 check is real), and the dev server rendering the home page.
+
+**Not verified:** a live query end to end (no SerpAPI or Anthropic key on the development machine).

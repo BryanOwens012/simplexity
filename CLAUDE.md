@@ -12,7 +12,8 @@ Build a Perplexity.ai clone
   - ✅ Citations linking to sources
 - ✅ **Tech Stack Finalized**:
   - **Core Dependencies**:
-    - Next.js 16, React 19, TypeScript 5 (Node >= 24)
+    - Next.js 16, React 19, TypeScript 7 (Node >= 26)
+      - `next build` type-checks with the project's own `tsc` CLI because TypeScript 7 has no JavaScript compiler API. Never set `experimental.useTypeScriptCli: false`: it breaks the build.
     - Tailwind CSS 4.x
     - lucide-react 0.454.0 (icons)
     - clsx 2.1.1, tailwind-merge 2.x (styling utilities)
