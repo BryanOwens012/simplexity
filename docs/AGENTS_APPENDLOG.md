@@ -3335,3 +3335,13 @@ export const SourceCard = ({ source, index, onAskAboutSource }: SourceCardProps)
 **Verified on Node 26.13.1:** `tsc --noEmit`, 34 tests, `next build` (which fails on a planted type error, so the TypeScript 7 check is real), and the dev server rendering the home page.
 
 **Not verified:** a live query end to end (no SerpAPI or Anthropic key on the development machine).
+
+## 2026-11-23 23:41 PT - Drop `npm` from the app's dependencies
+
+**Prompt:** User asked to remove `npm` from `apps/frontend` dependencies, the source of every remaining audit finding.
+
+**Changes:**
+- Removed `npm` from `dependencies` (144 packages out of the lockfile, deletions only). It came in with PR #1, most likely from `npm install npm` run inside the app. Nothing imports it, and Vercel supplies its own npm for `npm install` and `npm run build`.
+- `npm audit`: 32 moderate to 0.
+
+**Verified on Node 26.13.1:** `tsc --noEmit`, 34 tests, `next build`.
