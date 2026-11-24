@@ -3326,8 +3326,10 @@ export const SourceCard = ({ source, index, onAskAboutSource }: SourceCardProps)
 
 **Changes:**
 - `engines.node` `>=24.0.0` to `>=26.0.0`; `@types/node` `^24` to `^26`.
-- `typescript` `^5` to `^7`. Next.js 16.4 type-checks through the project's own `tsc` CLI by default (`experimental.useTypeScriptCli`), which is what makes TypeScript 7 work: it has no JavaScript compiler API yet. Leave that option at its default; setting it to `false` breaks `next build`.
-- Same-major upgrades via `/upgrade-deps`: next 16.4.6, react/react-dom 19.3.1, tailwindcss and @tailwindcss/postcss 4.3.5, vitest 5.1.0, npm 11.21.2. The npm audit went from 1 critical, 3 high, 35 moderate to 33 moderate (the critical was in `next`).
+- `typescript` `^5` to `^7`. Next.js 16.4 type-checks through the project's own `tsc` CLI by default (`experimental.useTypeScriptCli`), which is what makes TypeScript 7 work: it has no stable JavaScript compiler API yet (only `typescript/unstable/*` subpaths). Leave that option at its default; per Next's bundled docs, setting it to `false` makes `next build` exit under TypeScript 7.
+- Same-major upgrades via `/upgrade-deps`: next 16.4.6, react/react-dom 19.3.1, tailwindcss and @tailwindcss/postcss 4.3.5, vitest 5.1.0, npm 11.21.2. `baseline-browser-mapping` (a dependency of `next`) moved 2.10.18 to 2.11.38 in the lockfile to clear its advisory. The npm audit went from 1 critical, 3 high, 35 moderate to 32 moderate (the critical was in `next`); all 32 remaining are inside the `npm` package, which needs npm 12.
+- Transitive majors pulled in by the bumps above: `magic-string` 0.30 to 1.x (required by vitest 5.1 and @tailwindcss/node) and `undici-types` 7 to 8 (required by @types/node 26). Neither is imported by this repo directly.
+- Node 26 and TypeScript 7 ship in one PR because they were requested together; `tsc` 7 reported no removed or deprecated option in this `tsconfig.json`.
 - Majors reported, not taken: @anthropic-ai/sdk 1.x, lucide-react 1.x, tailwind-merge 3.x, npm 12.
 
 **Verified on Node 26.13.1:** `tsc --noEmit`, 34 tests, `next build` (which fails on a planted type error, so the TypeScript 7 check is real), and the dev server rendering the home page.
