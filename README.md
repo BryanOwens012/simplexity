@@ -40,7 +40,7 @@ Built solo using AI-assisted development; time allocation is logged in `docs/AGE
 
 - **Next.js 16** - App Router, React Server Components, API Routes
 - **React 19** - Concurrent rendering
-- **TypeScript 5** - Full type safety
+- **TypeScript 7** - Full type safety
 - **Tailwind CSS 4.x** - Styling (v4 native: `@import "tailwindcss"`, `@tailwindcss/postcss`, `bg-linear-to-*` gradients)
 - **Anthropic Claude Haiku** - AI answer generation; `lib/claudeModel.ts` picks the newest Haiku the API key can use, so new releases and retirements need no code change
 - **SerpAPI** - Google search results
@@ -108,7 +108,7 @@ Click a suggested question to instantly explore further.
 
 ### Prerequisites
 
-- Node.js 24.0.0 or higher
+- Node.js 26.0.0 or higher
 - [Anthropic API key](https://console.anthropic.com/)
 - [SerpAPI key](https://serpapi.com/) (250 free searches/month)
 

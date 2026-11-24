@@ -13,24 +13,24 @@
     "@anthropic-ai/sdk": "^0.91.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.454.0",
-    "next": "^16.3.6",
-    "npm": "^11.20.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "next": "^16.4.6",
+    "npm": "^11.21.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "serpapi": "^2.2.1",
     "tailwind-merge": "^2.6.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^24",
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8.5",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^5",
-    "vitest": "^5.0.5"
+    "tailwindcss": "^4.3.5",
+    "typescript": "^7",
+    "vitest": "^5.1.0"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=26.0.0"
   }
 }

@@ -16,7 +16,7 @@ A simplified Perplexity.ai clone called "Simplexity".
 5. ✅ **Additional features** - Conversation threading, tab navigation, loading states, auto-scroll
 
 ### Implementation Details
-- **Framework**: Next.js 16, React 19, TypeScript 5
+- **Framework**: Next.js 16, React 19, TypeScript 7
 - **Styling**: Tailwind CSS 4.x (dark theme, zinc-950 background)
 - **APIs**: SerpAPI 2.2.1, Anthropic Claude Haiku (cheapest available, chosen at runtime)
 - **State**: sessionStorage (no database, no complex state management)
